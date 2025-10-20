@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAE Visa Application Form - EasyUAEVisa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">🇦🇪</div>
+                    <div class="logo-text">
+                        <h1>EasyUAEVisa</h1>
+                        <p>Official UAE Visa Portal</p>
+                    </div>
+                </div>
+                <nav class="header-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="application.html" class="nav-link active">Apply Now</a>
+                    <a href="status.html" class="nav-link">Track Application</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="form-header">
+                <h1>UAE Visa Application</h1>
+                <p>Complete the form below to apply for your UAE visa. All fields marked with * are required.</p>
+            </div>
+
+            <form id="visaApplicationForm" class="visa-form">
+                <!-- Personal Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-user"></i>Personal Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                            <div class="error-message" id="firstName-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                            <div class="error-message" id="lastName-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth *</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                            <div class="error-message" id="dateOfBirth-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nationality">Nationality *</label>
+                            <select id="nationality" name="nationality" required>
+                                <option value="">Select Nationality</option>
+                                <option value="BW">Botswana</option>
+                                <option value="KM">Comoros</option>
+                                <option value="SZ">Eswatini (Swaziland)</option>
+                                <option value="LS">Lesotho</option>
+                                <option value="MG">Madagascar</option>
+                                <option value="MW">Malawi</option>
+                                <option value="MZ">Mozambique</option>
+                                <option value="NA">Namibia</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="TZ">Tanzania</option>
+                                <option value="ZM">Zambia</option>
+                                <option value="ZW">Zimbabwe</option>
+                            </select>
+                            <div class="error-message" id="nationality-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                            <div class="error-message" id="gender-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maritalStatus">Marital Status</label>
+                            <select id="maritalStatus" name="maritalStatus">
+                                <option value="">Select Status</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                            </select>
+                            <div class="error-message" id="maritalStatus-error"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-phone"></i>Contact Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                            <div class="error-message" id="email-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required>
+                            <div class="error-message" id="phone-error"></div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3"></textarea>
+                            <div class="error-message" id="address-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city">
+                            <div class="error-message" id="city-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" name="country">
+                            <div class="error-message" id="country-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="postalCode">Postal Code</label>
+                            <input type="text" id="postalCode" name="postalCode">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Passport Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-passport"></i>Passport Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="passportNumber">Passport Number *</label>
+                            <input type="text" id="passportNumber" name="passportNumber" required>
+                            <div class="error-message" id="passportNumber-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportIssueDate">Issue Date *</label>
+                            <input type="date" id="passportIssueDate" name="passportIssueDate" required>
+                            <div class="error-message" id="passportIssueDate-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportExpiryDate">Expiry Date *</label>
+                            <input type="date" id="passportExpiryDate" name="passportExpiryDate" required>
+                            <div class="error-message" id="passportExpiryDate-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportPlaceOfIssue">Place of Issue</label>
+                            <input type="text" id="passportPlaceOfIssue" name="passportPlaceOfIssue">
+                            <div class="error-message" id="passportPlaceOfIssue-error"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Visa Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-plane"></i>Visa Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="visaType">Visa Type *</label>
+                            <select id="visaType" name="visaType" required>
+                                <option value="">Select Visa Type</option>
+                                <option value="tourist-30-single" data-fee="636">Tourist Visa - 30 Days Single Entry (AED 636)</option>
+                                <option value="tourist-30-multiple" data-fee="1203">Tourist Visa - 30 Days Multiple Entry (AED 1,203)</option>
+                                <option value="tourist-60-single" data-fee="1031">Tourist Visa - 60 Days Single Entry (AED 1,031)</option>
+                                <option value="tourist-60-multiple" data-fee="1980">Tourist Visa - 60 Days Multiple Entry (AED 1,980)</option>
+                                <option value="business-30" data-fee="1200">Business Visa - 30 Days (AED 1,200)</option>
+                                <option value="transit-96" data-fee="200">Transit Visa - 96 Hours (AED 200)</option>
+                            </select>
+                            <div class="error-message" id="visaType-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="processingTime">Processing Time *</label>
+                            <select id="processingTime" name="processingTime" required>
+                                <option value="">Select Processing Time</option>
+                                <option value="standard" data-fee="100">Standard (3-5 days) - AED 100</option>
+                                <option value="express" data-fee="200">Express (1-2 days) - AED 200</option>
+                                <option value="urgent" data-fee="300">Urgent (Same day) - AED 300</option>
+                            </select>
+                            <div class="error-message" id="processingTime-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="entryDate">Intended Entry Date</label>
+                            <input type="date" id="entryDate" name="entryDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="exitDate">Intended Exit Date</label>
+                            <input type="date" id="exitDate" name="exitDate">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Document Upload -->
+                <section class="form-section">
+                    <h2><i class="fas fa-file-upload"></i>Document Upload</h2>
+                    
+                    <div class="upload-grid">
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-passport"></i>
+                                <span>Passport Copy</span>
+                                <input type="file" name="passport" accept="image/*,.pdf">
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
+                                </div>
+                                <div class="file-info"></div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-camera"></i>
+                                <span>Passport Photo</span>
+                                <input type="file" name="photo" accept="image/*">
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG (Max 2MB)</small>
+                                </div>
+                                <div class="file-info"></div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Fee Summary -->
+                <section class="form-section">
+                    <h2><i class="fas fa-calculator"></i>Fee Summary</h2>
+                    <div class="fee-summary">
+                        <div class="fee-row">
+                            <span>Visa Fee:</span>
+                            <span id="visaFee">$0</span>
+                        </div>
+                        <div class="fee-row">
+                            <span>Service Fee:</span>
+                            <span id="serviceFee">$0</span>
+                        </div>
+                        <div class="fee-row total">
+                            <span>Total Amount:</span>
+                            <span id="totalFee">$0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency Converter Calculator -->
+                    <div class="currency-converter" style="margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <h3 style="font-size: 1rem; margin-bottom: 1rem; color: #333;">
+                            <i class="fas fa-exchange-alt"></i> Currency Converter
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center;">
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Amount (AED)</label>
+                                <input type="number" id="converterAmount" value="636" min="0" step="0.01" 
+                                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                            </div>
+                            <div style="padding-top: 1.5rem;">
+                                <i class="fas fa-arrow-right" style="color: #00732e;"></i>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Convert to</label>
+                                <select id="converterCurrency" 
+                                        style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
+                                    <option value="">Select Currency</option>
+                                    <option value="ZAR">South African Rand (R)</option>
+                                    <option value="BWP">Botswana Pula (P)</option>
+                                    <option value="NAD">Namibian Dollar (N$)</option>
+                                    <option value="TZS">Tanzanian Shilling (TSh)</option>
+                                    <option value="ZMW">Zambian Kwacha (ZK)</option>
+                                    <option value="MZN">Mozambican Metical (MT)</option>
+                                    <option value="USD">US Dollar ($)</option>
+                                    <option value="MWK">Malawian Kwacha (MK)</option>
+                                    <option value="MGA">Malagasy Ariary (Ar)</option>
+                                    <option value="KMF">Comorian Franc (CF)</option>
+                                    <option value="LSL">Lesotho Loti (L)</option>
+                                    <option value="SZL">Swazi Lilangeni (E)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="converterResult" style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 4px; text-align: center; font-size: 1.25rem; font-weight: 600; color: #00732e; min-height: 3rem; display: flex; align-items: center; justify-content: center;">
+                            Select currency to see conversion
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Application
+                    </button>
+                    <button type="button" class="btn btn-outline" id="saveProgress">
+                        <i class="fas fa-save"></i>
+                        Save Progress
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle text-success"></i>
+                        Application Submitted Successfully!
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>Your visa application has been submitted successfully.</p>
+                    <div class="application-details">
+                        <p><strong>Application Reference:</strong> <span id="applicationRef"></span></p>
+                        <p><strong>Total Fee:</strong> <span id="modalTotalFee"></span></p>
+                    </div>
+                    <p class="text-muted">You can track your application status using the reference number above.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="status.html" class="btn btn-primary">Track Application</a>
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo-section">
+                        <div class="logo-icon">🇦🇪</div>
+                        <div class="logo-text">
+                            <h3>EasyUAEVisa</h3>
+                            <p>Official UAE Visa Portal</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="application.html">Tourist Visa</a></li>
+                        <li><a href="application.html">Business Visa</a></li>
+                        <li><a href="application.html">Transit Visa</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="status.html">Track Application</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> support@easyuaevisa.com</li>
+                        <li><i class="fas fa-phone"></i> +971-4-123-4567</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 EasyUAEVisa. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="application-script.js"></script>
+</body>
+</html>

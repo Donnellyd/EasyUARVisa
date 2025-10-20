@@ -1,0 +1,1430 @@
+index.HTML=
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>
+
+
+Static Website
+application.html = <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAE Visa Application Form - EasyUAEVisa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">🇦🇪</div>
+                    <div class="logo-text">
+                        <h1>EasyUAEVisa</h1>
+                        <p>Official UAE Visa Portal</p>
+                    </div>
+                </div>
+                <div class="header-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="status.html" class="nav-link">Track Application</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="form-header">
+                <h1>UAE Visa Application</h1>
+                <p>Complete the form below to apply for your UAE visa. All fields marked with * are required.</p>
+            </div>
+
+            <form id="visaApplicationForm" class="visa-form">
+                <!-- Personal Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-user"></i>Personal Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth *</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nationality">Nationality *</label>
+                            <select id="nationality" name="nationality" required>
+                                <option value="">Select Nationality</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="CA">Canada</option>
+                                <option value="AU">Australia</option>
+                                <option value="IN">India</option>
+                                <option value="PK">Pakistan</option>
+                                <option value="BD">Bangladesh</option>
+                                <option value="PH">Philippines</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender *</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="maritalStatus">Marital Status *</label>
+                            <select id="maritalStatus" name="maritalStatus" required>
+                                <option value="">Select Status</option>
+                                <option value="single">Single</option>
+                                <option value="married">Married</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-phone"></i>Contact Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address *</label>
+                            <textarea id="address" name="address" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country *</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="postalCode">Postal Code</label>
+                            <input type="text" id="postalCode" name="postalCode">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Passport Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-passport"></i>Passport Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="passportNumber">Passport Number *</label>
+                            <input type="text" id="passportNumber" name="passportNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportIssueDate">Issue Date *</label>
+                            <input type="date" id="passportIssueDate" name="passportIssueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportExpiryDate">Expiry Date *</label>
+                            <input type="date" id="passportExpiryDate" name="passportExpiryDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="passportPlaceOfIssue">Place of Issue *</label>
+                            <input type="text" id="passportPlaceOfIssue" name="passportPlaceOfIssue" required>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Visa Information -->
+                <section class="form-section">
+                    <h2><i class="fas fa-plane"></i>Visa Information</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="visaType">Visa Type *</label>
+                            <select id="visaType" name="visaType" required onchange="updateVisaFees()">
+                                <option value="">Select Visa Type</option>
+                                <option value="tourist-30-single" data-fee="350">Tourist Visa - 30 Days Single Entry</option>
+                                <option value="tourist-30-multiple" data-fee="500">Tourist Visa - 30 Days Multiple Entry</option>
+                                <option value="tourist-90-single" data-fee="750">Tourist Visa - 90 Days Single Entry</option>
+                                <option value="business-30" data-fee="1200">Business Visa - 30 Days</option>
+                                <option value="transit-96" data-fee="200">Transit Visa - 96 Hours</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="processingTime">Processing Time *</label>
+                            <select id="processingTime" name="processingTime" required onchange="updateServiceFees()">
+                                <option value="">Select Processing Time</option>
+                                <option value="standard" data-fee="100">Standard (3-5 days)</option>
+                                <option value="express" data-fee="200">Express (1-2 days)</option>
+                                <option value="urgent" data-fee="300">Urgent (Same day)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="entryDate">Intended Entry Date</label>
+                            <input type="date" id="entryDate" name="entryDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="exitDate">Intended Exit Date</label>
+                            <input type="date" id="exitDate" name="exitDate">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Document Upload -->
+                <section class="form-section">
+                    <h2><i class="fas fa-file-upload"></i>Document Upload</h2>
+                    
+                    <div class="upload-grid">
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-passport"></i>
+                                <span>Passport Copy *</span>
+                                <input type="file" name="passport" accept="image/*,.pdf" required>
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-camera"></i>
+                                <span>Passport Photo *</span>
+                                <input type="file" name="photo" accept="image/*" required>
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG (Max 3MB)</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-plane-departure"></i>
+                                <span>Flight Ticket *</span>
+                                <input type="file" name="ticket" accept="image/*,.pdf" required>
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-hotel"></i>
+                                <span>Hotel Booking *</span>
+                                <input type="file" name="hotel" accept="image/*,.pdf" required>
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Fee Summary -->
+                <section class="form-section">
+                    <h2><i class="fas fa-calculator"></i>Fee Summary</h2>
+                    
+                    <div class="fee-summary">
+                        <div class="fee-item">
+                            <span>Visa Fee:</span>
+                            <span id="visaFee">AED 0</span>
+                        </div>
+                        <div class="fee-item">
+                            <span>Service Fee:</span>
+                            <span id="serviceFee">AED 0</span>
+                        </div>
+                        <div class="fee-item total">
+                            <span>Total Amount:</span>
+                            <span id="totalFee">AED 0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Terms and Conditions -->
+                <section class="form-section">
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" target="_blank">Terms and Conditions</a> and <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="dataAccuracy" name="dataAccuracy" required>
+                            <span class="checkmark"></span>
+                            I confirm that all information provided is accurate and complete
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Submit Button -->
+                <div class="form-submit">
+                    <button type="submit" class="btn-primary btn-large">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Application
+                    </button>
+                    <p class="submit-note">
+                        You will be redirected to the payment page after submission
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 UAE Government - All rights reserved. Official visa portal.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+index.html = <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyUAEVisa - Official UAE Visa Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">🇦🇪</div>
+                    <div class="logo-text">
+                        <h1>EasyUAEVisa</h1>
+                        <p>Official UAE Visa Portal</p>
+                    </div>
+                </div>
+                <div class="header-nav">
+                    <a href="status.html" class="nav-link">Track Application</a>
+                    <a href="application.html" class="btn-primary">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="badge">Official Government Portal</div>
+                <h1 class="hero-title">
+                    UAE Visa Application
+                    <span class="hero-subtitle">Made Simple</span>
+                </h1>
+                <p class="hero-description">
+                    Apply for your UAE visa online with our AI-powered platform. Fast, secure, and government-approved processing with real-time tracking.
+                </p>
+                <div class="hero-buttons">
+                    <a href="application.html" class="btn-primary btn-large">Start Application</a>
+                    <a href="status.html" class="btn-secondary btn-large">Track Status</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Steps -->
+    <section class="process-section">
+        <div class="container">
+            <h2 class="section-title">Simple 4-Step Process</h2>
+            <div class="process-grid">
+                <div class="process-step">
+                    <div class="step-icon">📝</div>
+                    <h3>1. Apply Online</h3>
+                    <p>Fill out the secure application form with your details and upload required documents.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-icon">💳</div>
+                    <h3>2. Pay Securely</h3>
+                    <p>Complete payment using our secure payment gateway with multiple payment options.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-icon">🔍</div>
+                    <h3>3. AI Verification</h3>
+                    <p>Our AI system reviews your documents and verifies information for accuracy.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-icon">✅</div>
+                    <h3>4. Receive Visa</h3>
+                    <p>Get your approved visa delivered directly to your email within 24-72 hours.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visa Types -->
+    <section class="visa-types">
+        <div class="container">
+            <h2 class="section-title">Available Visa Types</h2>
+            <div class="visa-grid">
+                <div class="visa-card">
+                    <div class="visa-header">
+                        <i class="fas fa-plane-departure"></i>
+                        <h3>Tourist Visa</h3>
+                    </div>
+                    <div class="visa-content">
+                        <p class="visa-duration">30 Days</p>
+                        <p class="visa-price">From AED 350</p>
+                        <ul class="visa-features">
+                            <li>Single/Multiple Entry</li>
+                            <li>Tourism & Leisure</li>
+                            <li>Visit Family & Friends</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="visa-card">
+                    <div class="visa-header">
+                        <i class="fas fa-briefcase"></i>
+                        <h3>Business Visa</h3>
+                    </div>
+                    <div class="visa-content">
+                        <p class="visa-duration">90 Days</p>
+                        <p class="visa-price">From AED 1,200</p>
+                        <ul class="visa-features">
+                            <li>Business Meetings</li>
+                            <li>Conferences</li>
+                            <li>Professional Events</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="visa-card">
+                    <div class="visa-header">
+                        <i class="fas fa-users"></i>
+                        <h3>Transit Visa</h3>
+                    </div>
+                    <div class="visa-content">
+                        <p class="visa-duration">96 Hours</p>
+                        <p class="visa-price">From AED 200</p>
+                        <ul class="visa-features">
+                            <li>Airport Transit</li>
+                            <li>Short Layover</li>
+                            <li>Quick Processing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose EasyUAEVisa?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>100% Secure</h3>
+                    <p>Bank-level encryption and security protocols protect your personal information.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Fast Processing</h3>
+                    <p>AI-powered verification ensures quick processing within 24-72 hours.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Round-the-clock customer support to assist you throughout the process.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Friendly</h3>
+                    <p>Apply from anywhere using your mobile device with our responsive design.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>Global Access</h3>
+                    <p>Available worldwide with support for multiple languages and currencies.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>High Success Rate</h3>
+                    <p>98% approval rate with our comprehensive document verification system.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements -->
+    <section class="requirements">
+        <div class="container">
+            <h2 class="section-title">Document Requirements</h2>
+            <div class="requirements-grid">
+                <div class="requirement-card">
+                    <i class="fas fa-passport"></i>
+                    <h3>Passport</h3>
+                    <p>Valid passport with at least 6 months validity remaining</p>
+                </div>
+                <div class="requirement-card">
+                    <i class="fas fa-camera"></i>
+                    <h3>Photograph</h3>
+                    <p>Recent passport-size photo with white background</p>
+                </div>
+                <div class="requirement-card">
+                    <i class="fas fa-plane"></i>
+                    <h3>Flight Ticket</h3>
+                    <p>Confirmed round-trip flight booking</p>
+                </div>
+                <div class="requirement-card">
+                    <i class="fas fa-hotel"></i>
+                    <h3>Hotel Booking</h3>
+                    <p>Confirmed hotel reservation for your stay</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Apply for Your UAE Visa?</h2>
+                <p>Join thousands of satisfied customers who have successfully obtained their UAE visa through our platform.</p>
+                <a href="application.html" class="btn-primary btn-large">Start Your Application</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>EasyUAEVisa</h4>
+                    <p>Official UAE Government visa processing portal powered by AI technology.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="application.html">Apply Now</a></li>
+                        <li><a href="status.html">Track Application</a></li>
+                        <li><a href="#requirements">Requirements</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="mailto:support@easyuaevisa.com">support@easyuaevisa.com</a></li>
+                        <li><a href="tel:+971-xxx-xxxx">+971 XXX XXXX</a></li>
+                        <li><a href="#">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Security</h4>
+                    <p>✅ Government approved</p>
+                    <p>🛡️ PCI DSS compliant</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 UAE Government - All rights reserved. Official visa portal.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+script.js = // Dubai Visa AI - Static Website JavaScript
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApplication();
+});
+
+function initializeApplication() {
+    // Initialize form handlers
+    initializeVisaForm();
+    initializeStatusForm();
+    initializeFileUploads();
+    initializeFormValidation();
+    
+    // Initialize UI enhancements
+    initializeSmoothScrolling();
+    initializeAnimations();
+    
+    console.log('Dubai Visa AI - Static website initialized');
+}
+
+// Visa Application Form
+function initializeVisaForm() {
+    const visaForm = document.getElementById('visaApplicationForm');
+    if (!visaForm) return;
+    
+    visaForm.addEventListener('submit', handleVisaFormSubmission);
+    
+    // Initialize fee calculations
+    updateVisaFees();
+    updateServiceFees();
+}
+
+function handleVisaFormSubmission(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const applicationData = Object.fromEntries(formData.entries());
+    
+    // Validate required fields
+    if (!validateVisaForm(applicationData)) {
+        return;
+    }
+    
+    // Show loading state
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    submitButton.disabled = true;
+    
+    // Simulate form submission (replace with actual API call)
+    setTimeout(() => {
+        showSuccessMessage('Application submitted successfully! You will be redirected to payment.');
+        
+        // Generate mock application number
+        const applicationNumber = 'UAE-' + new Date().getFullYear() + '-' + 
+                                Math.random().toString(36).substr(2, 6).toUpperCase();
+        
+        // Store application data in localStorage for demo
+        localStorage.setItem('visaApplication', JSON.stringify({
+            ...applicationData,
+            applicationNumber,
+            submissionDate: new Date().toISOString(),
+            status: 'submitted'
+        }));
+        
+        // Redirect to status page after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'status.html';
+        }, 3000);
+        
+    }, 2000);
+}
+
+function validateVisaForm(data) {
+    const requiredFields = [
+        'firstName', 'lastName', 'dateOfBirth', 'nationality', 'gender',
+        'email', 'phone', 'passportNumber', 'passportIssueDate', 
+        'passportExpiryDate', 'visaType', 'processingTime'
+    ];
+    
+    for (let field of requiredFields) {
+        if (!data[field] || data[field].trim() === '') {
+            showErrorMessage(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
+            document.getElementById(field)?.focus();
+            return false;
+        }
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        showErrorMessage('Please enter a valid email address.');
+        document.getElementById('email')?.focus();
+        return false;
+    }
+    
+    // Validate passport expiry date
+    const expiryDate = new Date(data.passportExpiryDate);
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+    
+    if (expiryDate < sixMonthsFromNow) {
+        showErrorMessage('Passport must be valid for at least 6 months from today.');
+        document.getElementById('passportExpiryDate')?.focus();
+        return false;
+    }
+    
+    // Check if terms are accepted
+    if (!data.termsAccepted || !data.dataAccuracy) {
+        showErrorMessage('Please accept the terms and conditions.');
+        return false;
+    }
+    
+    return true;
+}
+
+// Status Form
+function initializeStatusForm() {
+    const statusForm = document.getElementById('statusForm');
+    if (!statusForm) return;
+    
+    statusForm.addEventListener('submit', handleStatusFormSubmission);
+    
+    // Check if there's stored application data to display
+    checkStoredApplication();
+}
+
+function handleStatusFormSubmission(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const email = formData.get('email');
+    const passportNumber = formData.get('passportNumber');
+    
+    // Show loading state
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+    submitButton.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        const storedApplication = JSON.parse(localStorage.getItem('visaApplication') || '{}');
+        
+        if (storedApplication.email === email && storedApplication.passportNumber === passportNumber) {
+            displayApplicationStatus(storedApplication);
+        } else {
+            // Show demo application for any other email/passport combination
+            displayDemoApplicationStatus(email, passportNumber);
+        }
+        
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+        
+    }, 1500);
+}
+
+function checkStoredApplication() {
+    const storedApplication = JSON.parse(localStorage.getItem('visaApplication') || '{}');
+    if (storedApplication.applicationNumber) {
+        // Pre-fill the form with stored data
+        document.getElementById('statusEmail').value = storedApplication.email || '';
+        document.getElementById('statusPassport').value = storedApplication.passportNumber || '';
+        
+        // Auto-display the application if coming from form submission
+        if (window.location.hash === '#submitted') {
+            displayApplicationStatus(storedApplication);
+        }
+    }
+}
+
+function displayApplicationStatus(application) {
+    const statusResults = document.getElementById('statusResults');
+    if (!statusResults) return;
+    
+    // Update application details
+    document.getElementById('applicationNumber').textContent = application.applicationNumber || 'UAE-2024-001234';
+    document.getElementById('applicantName').textContent = 
+        `${application.firstName || 'John'} ${application.lastName || 'Doe'}`;
+    document.getElementById('visaType').textContent = getVisaTypeDisplay(application.visaType) || 'Tourist Visa - 30 Days';
+    document.getElementById('applicationDate').textContent = 
+        new Date(application.submissionDate || Date.now()).toLocaleDateString();
+    document.getElementById('processingTime').textContent = 
+        getProcessingTimeDisplay(application.processingTime) || 'Standard (3-5 days)';
+    document.getElementById('totalAmount').textContent = 
+        `AED ${calculateTotalAmount(application.visaType, application.processingTime)}`;
+    
+    // Update status badge
+    const statusBadge = document.getElementById('statusBadge');
+    const status = application.status || 'processing';
+    statusBadge.textContent = getStatusDisplay(status);
+    statusBadge.className = `status-badge status-${status}`;
+    
+    // Show results
+    statusResults.style.display = 'block';
+    statusResults.scrollIntoView({ behavior: 'smooth' });
+}
+
+function displayDemoApplicationStatus(email, passportNumber) {
+    const demoApplication = {
+        applicationNumber: 'UAE-2024-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+        firstName: 'Demo',
+        lastName: 'User',
+        email: email,
+        passportNumber: passportNumber,
+        visaType: 'tourist-30-single',
+        processingTime: 'standard',
+        submissionDate: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'processing'
+    };
+    
+    displayApplicationStatus(demoApplication);
+}
+
+// File Upload Handling
+function initializeFileUploads() {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    
+    fileInputs.forEach(input => {
+        input.addEventListener('change', handleFileSelection);
+        
+        // Add drag and drop functionality
+        const uploadArea = input.closest('.upload-item')?.querySelector('.upload-area');
+        if (uploadArea) {
+            setupDragAndDrop(uploadArea, input);
+        }
+    });
+}
+
+function handleFileSelection(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showErrorMessage('File size must be less than 5MB.');
+        e.target.value = '';
+        return;
+    }
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+        showErrorMessage('Please upload a valid file (JPG, PNG, or PDF).');
+        e.target.value = '';
+        return;
+    }
+    
+    // Update upload area to show selected file
+    const uploadArea = e.target.closest('.upload-item')?.querySelector('.upload-area');
+    if (uploadArea) {
+        uploadArea.innerHTML = `
+            <div style="color: var(--primary-color);">
+                <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <p style="margin: 0; font-weight: 600;">${file.name}</p>
+                <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            </div>
+        `;
+        uploadArea.style.borderColor = 'var(--primary-color)';
+        uploadArea.style.backgroundColor = 'rgba(0, 132, 61, 0.05)';
+    }
+}
+
+function setupDragAndDrop(uploadArea, fileInput) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    uploadArea.addEventListener('drop', (e) => handleDrop(e, fileInput), false);
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight() {
+        uploadArea.style.borderColor = 'var(--primary-color)';
+        uploadArea.style.backgroundColor = 'rgba(0, 132, 61, 0.05)';
+    }
+    
+    function unhighlight() {
+        uploadArea.style.borderColor = 'var(--border-color)';
+        uploadArea.style.backgroundColor = 'var(--background)';
+    }
+    
+    function handleDrop(e, input) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            input.files = files;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+}
+
+// Fee Calculation
+function updateVisaFees() {
+    const visaTypeSelect = document.getElementById('visaType');
+    if (!visaTypeSelect) return;
+    
+    visaTypeSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const fee = selectedOption.getAttribute('data-fee') || 0;
+        
+        document.getElementById('visaFee').textContent = `AED ${fee}`;
+        updateTotalFee();
+    });
+}
+
+function updateServiceFees() {
+    const processingSelect = document.getElementById('processingTime');
+    if (!processingSelect) return;
+    
+    processingSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const fee = selectedOption.getAttribute('data-fee') || 0;
+        
+        document.getElementById('serviceFee').textContent = `AED ${fee}`;
+        updateTotalFee();
+    });
+}
+
+function updateTotalFee() {
+    const visaFeeText = document.getElementById('visaFee')?.textContent || 'AED 0';
+    const serviceFeeText = document.getElementById('serviceFee')?.textContent || 'AED 0';
+    
+    const visaFee = parseInt(visaFeeText.replace('AED ', '')) || 0;
+    const serviceFee = parseInt(serviceFeeText.replace('AED ', '')) || 0;
+    const total = visaFee + serviceFee;
+    
+    document.getElementById('totalFee').textContent = `AED ${total}`;
+}
+
+function calculateTotalAmount(visaType, processingTime) {
+    const visaFees = {
+        'tourist-30-single': 350,
+        'tourist-30-multiple': 500,
+        'tourist-90-single': 750,
+        'business-30': 1200,
+        'transit-96': 200
+    };
+    
+    const serviceFees = {
+        'standard': 100,
+        'express': 200,
+        'urgent': 300
+    };
+    
+    const visaFee = visaFees[visaType] || 350;
+    const serviceFee = serviceFees[processingTime] || 100;
+    
+    return visaFee + serviceFee;
+}
+
+// Helper Functions
+function getVisaTypeDisplay(visaType) {
+    const displays = {
+        'tourist-30-single': 'Tourist Visa - 30 Days Single Entry',
+        'tourist-30-multiple': 'Tourist Visa - 30 Days Multiple Entry',
+        'tourist-90-single': 'Tourist Visa - 90 Days Single Entry',
+        'business-30': 'Business Visa - 30 Days',
+        'transit-96': 'Transit Visa - 96 Hours'
+    };
+    return displays[visaType] || visaType;
+}
+
+function getProcessingTimeDisplay(processingTime) {
+    const displays = {
+        'standard': 'Standard (3-5 days)',
+        'express': 'Express (1-2 days)',
+        'urgent': 'Urgent (Same day)'
+    };
+    return displays[processingTime] || processingTime;
+}
+
+function getStatusDisplay(status) {
+    const displays = {
+        'submitted': 'Submitted',
+        'processing': 'Under Review',
+        'verified': 'Verified',
+        'approved': 'Approved',
+        'declined': 'Declined'
+    };
+    return displays[status] || status;
+}
+
+// Form Validation
+function initializeFormValidation() {
+    const forms = document.querySelectorAll('form');
+    
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', validateField);
+            input.addEventListener('input', clearFieldError);
+        });
+    });
+}
+
+function validateField(e) {
+    const field = e.target;
+    const value = field.value.trim();
+    
+    // Clear previous errors
+    clearFieldError({ target: field });
+    
+    // Required field validation
+    if (field.hasAttribute('required') && !value) {
+        showFieldError(field, 'This field is required');
+        return false;
+    }
+    
+    // Email validation
+    if (field.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showFieldError(field, 'Please enter a valid email address');
+            return false;
+        }
+    }
+    
+    // Date validation
+    if (field.type === 'date' && value) {
+        const date = new Date(value);
+        const today = new Date();
+        
+        if (field.id === 'passportExpiryDate') {
+            const sixMonthsFromNow = new Date();
+            sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+            
+            if (date < sixMonthsFromNow) {
+                showFieldError(field, 'Passport must be valid for at least 6 months');
+                return false;
+            }
+        }
+        
+        if (field.id === 'dateOfBirth') {
+            const eighteenYearsAgo = new Date();
+            eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+            
+            if (date > eighteenYearsAgo) {
+                showFieldError(field, 'Applicant must be at least 18 years old');
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+function showFieldError(field, message) {
+    field.style.borderColor = 'var(--secondary-color)';
+    
+    // Remove existing error message
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.style.color = 'var(--secondary-color)';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '0.25rem';
+    errorDiv.textContent = message;
+    
+    field.parentNode.appendChild(errorDiv);
+}
+
+function clearFieldError(e) {
+    const field = e.target;
+    field.style.borderColor = '';
+    
+    const errorDiv = field.parentNode.querySelector('.field-error');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
+}
+
+// UI Enhancements
+function initializeSmoothScrolling() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+function initializeAnimations() {
+    // Intersection Observer for fade-in animations
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        // Observe elements that should animate in
+        document.querySelectorAll('.process-step, .visa-card, .feature-card, .requirement-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    }
+}
+
+// Message System
+function showSuccessMessage(message) {
+    showMessage(message, 'success');
+}
+
+function showErrorMessage(message) {
+    showMessage(message, 'error');
+}
+
+function showWarningMessage(message) {
+    showMessage(message, 'warning');
+}
+
+function showMessage(message, type = 'info') {
+    // Remove existing messages
+    const existingMessages = document.querySelectorAll('.message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas ${getMessageIcon(type)}"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" style="margin-left: auto; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: inherit;">&times;</button>
+        </div>
+    `;
+    
+    // Insert message at the top of the main content
+    const mainContent = document.querySelector('.main-content') || document.body;
+    mainContent.insertBefore(messageDiv, mainContent.firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.remove();
+        }
+    }, 5000);
+    
+    // Scroll to message
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function getMessageIcon(type) {
+    const icons = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'warning': 'fa-exclamation-triangle',
+        'info': 'fa-info-circle'
+    };
+    return icons[type] || icons.info;
+}
+
+// Utility Functions
+function formatDate(dateString) {
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+}
+
+function generateApplicationNumber() {
+    const year = new Date().getFullYear();
+    const random = Math.random().toString(36).substr(2, 6).toUpperCase();
+    return `UAE-${year}-${random}`;
+}
+
+// Export functions for global access (if needed)
+window.DubaiVisaAI = {
+    showSuccessMessage,
+    showErrorMessage,
+    showWarningMessage,
+    updateVisaFees,
+    updateServiceFees
+};
+
+status.html = <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Application - EasyUAEVisa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">🇦🇪</div>
+                    <div class="logo-text">
+                        <h1>EasyUAEVisa</h1>
+                        <p>Official UAE Visa Portal</p>
+                    </div>
+                </div>
+                <div class="header-nav">
+                    <a href="index.html" class="nav-link">Home</a>
+                    <a href="application.html" class="nav-link">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="status-header">
+                <h1>Track Your Application</h1>
+                <p>Enter your email and passport number to check your visa application status</p>
+            </div>
+
+            <!-- Status Check Form -->
+            <section class="status-form-section">
+                <form id="statusForm" class="status-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="statusEmail">Email Address *</label>
+                            <input type="email" id="statusEmail" name="email" required placeholder="Enter your email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="statusPassport">Passport Number *</label>
+                            <input type="text" id="statusPassport" name="passportNumber" required placeholder="Enter your passport number">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-search"></i>
+                        Check Status
+                    </button>
+                </form>
+            </section>
+
+            <!-- Status Results -->
+            <section id="statusResults" class="status-results" style="display: none;">
+                <div class="application-card">
+                    <div class="card-header">
+                        <h2>Application Details</h2>
+                        <div class="status-badge" id="statusBadge">Processing</div>
+                    </div>
+                    
+                    <div class="application-info">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Application Number:</label>
+                                <span id="applicationNumber">UAE-2024-001234</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Applicant Name:</label>
+                                <span id="applicantName">John Doe</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Visa Type:</label>
+                                <span id="visaType">Tourist Visa - 30 Days</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Application Date:</label>
+                                <span id="applicationDate">2024-01-15</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Processing Time:</label>
+                                <span id="processingTime">Standard (3-5 days)</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Total Amount:</label>
+                                <span id="totalAmount">AED 450</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Timeline -->
+                    <div class="progress-timeline">
+                        <h3>Application Progress</h3>
+                        <div class="timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h4>Application Submitted</h4>
+                                    <p>Your application has been received</p>
+                                    <span class="timeline-date">Jan 15, 2024 - 10:30 AM</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item completed">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h4>Payment Confirmed</h4>
+                                    <p>Payment successfully processed</p>
+                                    <span class="timeline-date">Jan 15, 2024 - 10:35 AM</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item current">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h4>Under Review</h4>
+                                    <p>Documents are being verified</p>
+                                    <span class="timeline-date">Jan 15, 2024 - 11:00 AM</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h4>Processing</h4>
+                                    <p>Application sent for final processing</p>
+                                    <span class="timeline-date">Pending</span>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h4>Visa Issued</h4>
+                                    <p>Visa approved and sent to email</p>
+                                    <span class="timeline-date">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-secondary">
+                            <i class="fas fa-download"></i>
+                            Download Receipt
+                        </button>
+                        <button class="btn-secondary">
+                            <i class="fas fa-envelope"></i>
+                            Email Status
+                        </button>
+                        <button class="btn-primary" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            Print Details
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Help Section -->
+            <section class="help-section">
+                <div class="help-card">
+                    <h2>Need Help?</h2>
+                    <div class="help-content">
+                        <div class="help-item">
+                            <i class="fas fa-question-circle"></i>
+                            <div>
+                                <h3>Common Questions</h3>
+                                <p>Find answers to frequently asked questions about visa processing</p>
+                            </div>
+                        </div>
+                        <div class="help-item">
+                            <i class="fas fa-headset"></i>
+                            <div>
+                                <h3>24/7 Support</h3>
+                                <p>Contact our support team for assistance with your application</p>
+                            </div>
+                        </div>
+                        <div class="help-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h3>Email Updates</h3>
+                                <p>Get automatic email notifications for status changes</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        <div class="contact-grid">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>support@easyuaevisa.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+971 XXX XXXX</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-clock"></i>
+                                <span>24/7 Support Available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Processing Times Info -->
+            <section class="processing-info">
+                <h2>Processing Times</h2>
+                <div class="processing-grid">
+                    <div class="processing-card">
+                        <h3>Standard Processing</h3>
+                        <p class="processing-time">3-5 Business Days</p>
+                        <p>Regular processing for most visa types</p>
+                    </div>
+                    <div class="processing-card">
+                        <h3>Express Processing</h3>
+                        <p class="processing-time">1-2 Business Days</p>
+                        <p>Faster processing for urgent travel needs</p>
+                    </div>
+                    <div class="processing-card">
+                        <h3>Urgent Processing</h3>
+                        <p class="processing-time">Same Day</p>
+                        <p>Emergency processing for immediate travel</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 UAE Government - All rights reserved. Official visa portal.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
