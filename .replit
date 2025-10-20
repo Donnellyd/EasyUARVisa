@@ -5,8 +5,9 @@ channel = "stable-25_05"
 packages = ["openssl", "postgresql"]
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 publicDir = "/"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 
 [workflows]
 runButton = "Project"
@@ -36,3 +37,7 @@ externalPort = 80
 [[ports]]
 localPort = 37141
 externalPort = 3000
+
+[[ports]]
+localPort = 41203
+externalPort = 3001
