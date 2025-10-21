@@ -1,7 +1,6 @@
 // Visa Application Form Handler
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('visaApplicationForm');
-    const nationalitySelect = document.getElementById('nationality');
     const visaTypeSelect = document.getElementById('visaType');
     const processingTimeSelect = document.getElementById('processingTime');
     const visaFeeElement = document.getElementById('visaFee');
@@ -58,10 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate fees when selections change
     visaTypeSelect?.addEventListener('change', calculateFees);
     processingTimeSelect?.addEventListener('change', calculateFees);
-    nationalitySelect?.addEventListener('change', function() {
-        calculateFees();
-        updateCurrencyDisplay();
-    });
     
     // Save progress button
     saveProgressBtn?.addEventListener('click', saveProgress);
@@ -98,9 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 dateOfBirth: formData.dateOfBirth,
-                nationality: formData.nationality,
-                gender: formData.gender,
-                maritalStatus: formData.maritalStatus
+                gender: formData.gender
             },
             contactInfo: {
                 email: formData.email,
@@ -149,11 +142,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateFees() {
         const visaType = visaTypeSelect?.value;
         const processingTime = processingTimeSelect?.value;
-        const nationality = nationalitySelect?.value;
         
         let visaFee = 0;
         
-        // Use standardized visa pricing (same for all nationalities)
+        // Use standardized visa pricing
         if (visaType && visaBaseFees[visaType]) {
             visaFee = visaBaseFees[visaType];
         }
@@ -164,33 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate total
         const total = visaFee + processingFee + serviceFee;
         
-        // Get currency info for selected nationality
-        const currencyInfo = nationality && countryCurrencies[nationality] ? countryCurrencies[nationality] : null;
-        
-        // Update display (AED currency with local currency conversion)
+        // Update display (AED currency only)
         if (visaFeeElement) {
-            let displayText = 'AED ' + visaFee.toFixed(2);
-            if (currencyInfo && exchangeRates[currencyInfo.code]) {
-                const converted = (visaFee * exchangeRates[currencyInfo.code]).toFixed(2);
-                displayText += ` (≈ ${currencyInfo.symbol}${converted})`;
-            }
-            visaFeeElement.textContent = displayText;
+            visaFeeElement.textContent = 'AED ' + visaFee.toFixed(2);
         }
         if (serviceFeeElement) {
-            let displayText = 'AED ' + serviceFee.toFixed(2);
-            if (currencyInfo && exchangeRates[currencyInfo.code]) {
-                const converted = (serviceFee * exchangeRates[currencyInfo.code]).toFixed(2);
-                displayText += ` (≈ ${currencyInfo.symbol}${converted})`;
-            }
-            serviceFeeElement.textContent = displayText;
+            serviceFeeElement.textContent = 'AED ' + serviceFee.toFixed(2);
         }
         if (totalFeeElement) {
-            let displayText = 'AED ' + total.toFixed(2);
-            if (currencyInfo && exchangeRates[currencyInfo.code]) {
-                const converted = (total * exchangeRates[currencyInfo.code]).toFixed(2);
-                displayText += ` (≈ ${currencyInfo.symbol}${converted})`;
-            }
-            totalFeeElement.textContent = displayText;
+            totalFeeElement.textContent = 'AED ' + total.toFixed(2);
         }
     }
     
@@ -404,17 +378,21 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInputs.forEach(input => {
         input.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            const fileInfo = e.target.closest('.upload-item').querySelector('.file-info');
+            const uploadItem = e.target.closest('.upload-item');
+            const fileInfo = uploadItem.querySelector('.file-info');
             
             if (file) {
                 const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
                 fileInfo.innerHTML = `
                     <div class="file-selected">
-                        <i class="fas fa-file"></i>
+                        <i class="fas fa-check-circle"></i>
                         <span>${file.name} (${fileSize} MB)</span>
                     </div>
                 `;
                 fileInfo.style.display = 'block';
+                
+                // Add uploaded class for green success styling
+                uploadItem.classList.add('uploaded');
             }
         });
     });
@@ -435,11 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             exchangeRates = data.rates;
             ratesLastFetched = now;
-            
-            // Update display if nationality is selected
-            if (nationalitySelect?.value) {
-                calculateFees();
-            }
             
             console.log('Exchange rates loaded successfully');
         } catch (error) {
