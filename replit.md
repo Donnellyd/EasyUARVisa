@@ -54,11 +54,21 @@ The application follows a traditional multi-page web architecture with separate 
 - **Gunicorn**: Production-ready WSGI server
 
 ## Recent Changes (October 21, 2025)
+
+### Design Updates
 - Removed Tourist Visa card from hero section for cleaner design
 - Eliminated all blue colors from the application - pure UAE color scheme
 - Changed all main headings to dark grey (#333333)
 - Buttons and icons changed from red back to black for professional look
 - Visa prices remain in red for visual emphasis
 - Clean, unobstructed Sheikh Zayed Grand Mosque hero background
+
+### Form Improvements
+- Removed Marital Status field from application form
+- Removed Nationality field from application form
+- Renamed "Passport Copy" upload to "Photo of Applicant"
+- Added new document upload fields: "Airline Confirmation" and "Hotel Booking"
+- Added light green success indicator when documents are uploaded
+- Removed days/time estimates from processing options (now shows "Standard", "Express", "Urgent")
 
 Note: The application currently operates with client-side demo data. Future enhancements may require backend services for real visa application processing, database integration, and API connectivity.
