@@ -19,7 +19,7 @@
     --dubai-warm-sand: #f4e4c1;
     --dubai-palm-green: #228b22;
     --dubai-building-gray: #696969;
-    --warm-welcome-text: #2c3e50;
+    --warm-welcome-text: #333333;
     
     /* Extended Color Palette */
     --primary-color: var(--dubai-sunset-orange);
@@ -172,96 +172,6 @@ body {
     flex-wrap: wrap;
 }
 
-.visa-card {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #455a64 100%);
-    color: var(--uae-white);
-    padding: 2.5rem;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-    transform: rotate(-5deg);
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.visa-card:hover {
-    transform: rotate(0deg) translateY(-5px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-}
-
-.visa-flag {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 2rem;
-    z-index: 3;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.visa-flag-red,
-.visa-flag-green,
-.visa-flag-white,
-.visa-flag-black {
-    display: none;
-}
-
-.visa-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.visa-card > * {
-    position: relative;
-    z-index: 2;
-}
-
-.visa-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    opacity: 0.8;
-}
-
-.visa-header .flag {
-    font-size: 1.25rem;
-}
-
-.visa-header .title {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.visa-type {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    background: linear-gradient(90deg, #ffffff 0%, #e0e0e0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.visa-validity {
-    font-size: 1.125rem;
-    opacity: 0.85;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
 
 /* Buttons */
 .btn {
