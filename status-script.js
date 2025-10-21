@@ -68,8 +68,26 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Searching for applications:', email, passport);
             
-            // Check application status via SDK
-            const applications = await sdk.checkApplicationStatus(email, passport);
+            let applications = [];
+            let fromLocalStorage = false;
+            
+            try {
+                // Try to check application status via SDK (backend)
+                applications = await sdk.checkApplicationStatus(email, passport);
+                console.log('Found applications from backend:', applications.length);
+                
+            } catch (backendError) {
+                console.warn('Backend lookup failed, checking localStorage:', backendError);
+                
+                // Backend failed - check localStorage
+                fromLocalStorage = true;
+                applications = searchLocalApplications(email, passport);
+                console.log('Found applications from localStorage:', applications.length);
+                
+                if (applications.length > 0) {
+                    showNotification('Showing locally saved application. Backend connection unavailable.', 'info');
+                }
+            }
             
             hideLoading();
             
@@ -79,10 +97,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Display the first application (or most recent)
-            displayApplicationStatus(applications[0]);
+            displayApplicationStatus(applications[0], false, fromLocalStorage);
             
-            // Start auto-refresh for status updates (every 30 seconds)
-            startAutoRefresh(email, passport);
+            // Start auto-refresh for status updates (every 30 seconds) - only if from backend
+            if (!fromLocalStorage) {
+                startAutoRefresh(email, passport);
+            }
             
         } catch (error) {
             hideLoading();
@@ -118,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Auto-refresh enabled (every 30 seconds)');
     }
     
-    function displayApplicationStatus(application, silent = false) {
+    function displayApplicationStatus(application, silent = false, fromLocalStorage = false) {
         hideError();
         
         if (!silent) {
@@ -127,7 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Populate basic information
         document.getElementById('displayReference').textContent = application.applicationNumber || 'N/A';
-        document.getElementById('applicantName').textContent = application.fullName || 'N/A';
+        
+        // Handle both backend (fullName) and local (firstName + lastName) formats
+        const applicantName = application.fullName || 
+            `${application.firstName || ''} ${application.lastName || ''}`.trim() || 'N/A';
+        document.getElementById('applicantName').textContent = applicantName;
         
         // Map visa type
         document.getElementById('visaType').textContent = getVisaTypeLabel(application.visaType);
@@ -135,20 +159,28 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('processingType').textContent = 
             getProcessingTypeLabel(application.processingTime);
         
+        // Handle both backend (createdAt) and local (submittedAt) formats
+        const submissionDate = application.createdAt || application.submittedAt;
         document.getElementById('submissionDate').textContent = 
-            formatDate(application.createdAt);
+            formatDate(submissionDate);
         
         document.getElementById('expectedDate').textContent = 
             application.expectedCompletionDate ? formatDate(application.expectedCompletionDate) : 'TBD';
         
         // Set current status badge
         const statusBadge = document.getElementById('currentStatus');
-        const statusLabel = sdk.getStatusLabel(application.status);
+        const currentStatus = application.status || 'pending';
+        
+        // Use SDK status label if available and not from localStorage
+        const statusLabel = !fromLocalStorage && sdk.getStatusLabel ? 
+            sdk.getStatusLabel(currentStatus) : 
+            getLocalStatusLabel(currentStatus);
+            
         statusBadge.textContent = statusLabel;
-        statusBadge.className = `status-badge status-${application.status}`;
+        statusBadge.className = `status-badge status-${currentStatus}`;
         
         // Update timeline based on status
-        updateTimelineFromStatus(application.status);
+        updateTimelineFromStatus(currentStatus);
         
         // Show/hide download button
         const downloadBtn = document.getElementById('downloadVisa');
@@ -227,6 +259,19 @@ document.addEventListener('DOMContentLoaded', function() {
             'urgent': 'Urgent'
         };
         return types[type] || type;
+    }
+    
+    function getLocalStatusLabel(status) {
+        const labels = {
+            'pending': 'Pending',
+            'open': 'Open',
+            'captured': 'Payment Received',
+            'submitted': 'Under Review',
+            'processing': 'Processing',
+            'approved': 'Approved',
+            'declined': 'Declined'
+        };
+        return labels[status] || status;
     }
     
     function formatDate(dateString) {
@@ -394,6 +439,24 @@ Support: support@easyuaevisa.com
                 }
             }, 300);
         }, 4000);
+    }
+    
+    function searchLocalApplications(email, passport) {
+        const data = localStorage.getItem('visa_applications');
+        if (!data) return [];
+        
+        try {
+            const applications = JSON.parse(data);
+            
+            // Filter applications by email and passport
+            return applications.filter(app => 
+                app.email?.toLowerCase() === email.toLowerCase() &&
+                app.passportNumber?.toLowerCase() === passport.toLowerCase()
+            );
+        } catch (error) {
+            console.error('Error parsing local applications:', error);
+            return [];
+        }
     }
     
     // Cleanup on page unload

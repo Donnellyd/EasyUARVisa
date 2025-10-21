@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'single-30': 636,
         'multiple-30': 1203,
         'single-60': 1031,
-        'multiple-60': 1426
+        'multiple-60': 1980
     };
     
     // Processing fees
