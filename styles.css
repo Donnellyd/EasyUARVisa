@@ -304,12 +304,12 @@ body {
 
 .btn-outline {
     background-color: transparent;
-    color: #000000;
-    border: 2px solid #000000;
+    color: #c8102e;
+    border: 2px solid #c8102e;
 }
 
 .btn-outline:hover {
-    background-color: #000000;
+    background-color: #c8102e;
     color: var(--uae-white);
     transform: translateY(-2px);
 }
