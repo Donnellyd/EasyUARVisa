@@ -60,25 +60,6 @@
                             <div class="error-message" id="dateOfBirth-error"></div>
                         </div>
                         <div class="form-group">
-                            <label for="nationality">Nationality *</label>
-                            <select id="nationality" name="nationality" required>
-                                <option value="">Select Nationality</option>
-                                <option value="BW">Botswana</option>
-                                <option value="KM">Comoros</option>
-                                <option value="SZ">Eswatini (Swaziland)</option>
-                                <option value="LS">Lesotho</option>
-                                <option value="MG">Madagascar</option>
-                                <option value="MW">Malawi</option>
-                                <option value="MZ">Mozambique</option>
-                                <option value="NA">Namibia</option>
-                                <option value="ZA">South Africa</option>
-                                <option value="TZ">Tanzania</option>
-                                <option value="ZM">Zambia</option>
-                                <option value="ZW">Zimbabwe</option>
-                            </select>
-                            <div class="error-message" id="nationality-error"></div>
-                        </div>
-                        <div class="form-group">
                             <label for="gender">Gender</label>
                             <select id="gender" name="gender">
                                 <option value="">Select Gender</option>
@@ -86,17 +67,6 @@
                                 <option value="female">Female</option>
                             </select>
                             <div class="error-message" id="gender-error"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="maritalStatus">Marital Status</label>
-                            <select id="maritalStatus" name="maritalStatus">
-                                <option value="">Select Status</option>
-                                <option value="single">Single</option>
-                                <option value="married">Married</option>
-                                <option value="divorced">Divorced</option>
-                                <option value="widowed">Widowed</option>
-                            </select>
-                            <div class="error-message" id="maritalStatus-error"></div>
                         </div>
                     </div>
                 </section>
@@ -210,8 +180,8 @@
                     <div class="upload-grid">
                         <div class="upload-item">
                             <label class="upload-label">
-                                <i class="fas fa-passport"></i>
-                                <span>Passport Copy</span>
+                                <i class="fas fa-user"></i>
+                                <span>Photo of Applicant</span>
                                 <input type="file" name="passport" accept="image/*,.pdf">
                                 <div class="upload-area">
                                     <p>Click to upload or drag and drop</p>
@@ -228,6 +198,30 @@
                                 <div class="upload-area">
                                     <p>Click to upload or drag and drop</p>
                                     <small>JPG, PNG (Max 2MB)</small>
+                                </div>
+                                <div class="file-info"></div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-plane"></i>
+                                <span>Airline Confirmation</span>
+                                <input type="file" name="airline" accept="image/*,.pdf">
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
+                                </div>
+                                <div class="file-info"></div>
+                            </label>
+                        </div>
+                        <div class="upload-item">
+                            <label class="upload-label">
+                                <i class="fas fa-hotel"></i>
+                                <span>Hotel Booking</span>
+                                <input type="file" name="hotel" accept="image/*,.pdf">
+                                <div class="upload-area">
+                                    <p>Click to upload or drag and drop</p>
+                                    <small>JPG, PNG, PDF (Max 5MB)</small>
                                 </div>
                                 <div class="file-info"></div>
                             </label>
