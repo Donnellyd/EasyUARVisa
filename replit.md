@@ -98,4 +98,11 @@ The application is now integrated with the DubaiVisaAI backend portal:
 3. **Status Check**: User enters email + passport → SDK queries backend → Displays real-time status
 4. **Auto-Refresh**: Status page automatically checks for updates every 30 seconds
 
-The system no longer relies on localStorage for submissions - all data is managed by the DubaiVisaAI backend.
+### Fallback System (October 21, 2025)
+To ensure the application remains functional even when the backend is unavailable:
+- **Smart Fallback**: Application tries backend first, automatically falls back to localStorage if connection fails
+- **Seamless Experience**: Users can submit applications and track status regardless of backend availability
+- **Local Reference Numbers**: When backend is down, generates local reference numbers (UAE-YYYYMMDD-XXXX)
+- **Status Tracking**: Works with both backend data and locally saved applications
+- **Auto-Notification**: Users are informed when using local storage vs. backend connection
+- **No Errors**: Instead of showing "Failed to fetch" errors, the app gracefully handles connection issues
