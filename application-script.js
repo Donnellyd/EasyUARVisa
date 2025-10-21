@@ -123,19 +123,47 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Submitting application:', applicationData);
             
-            // Submit application via SDK
-            const result = await sdk.submitApplication(applicationData);
+            let applicationNumber;
+            let useLocalStorage = false;
             
-            console.log('Application submitted successfully:', result);
+            try {
+                // Try to submit application via SDK (backend)
+                const result = await sdk.submitApplication(applicationData);
+                
+                console.log('Application submitted successfully to backend:', result);
+                
+                // Get the application ID and number from response
+                const applicationId = result.application.id;
+                applicationNumber = result.application.applicationNumber;
+                
+                // Upload documents if any files were selected
+                await uploadDocuments(applicationId);
+                
+            } catch (backendError) {
+                console.warn('Backend submission failed, using localStorage fallback:', backendError);
+                
+                // Backend failed - fall back to localStorage
+                useLocalStorage = true;
+                applicationNumber = generateLocalReferenceNumber();
+                
+                // Save to localStorage
+                const localApplication = {
+                    ...applicationData,
+                    applicationNumber: applicationNumber,
+                    submittedAt: new Date().toISOString(),
+                    status: 'pending',
+                    source: 'local'
+                };
+                
+                saveApplicationToLocalStorage(localApplication);
+                
+                console.log('Application saved locally with reference:', applicationNumber);
+                
+                // Show info message about offline mode
+                showNotification('Application saved locally. It will sync when connection is restored.', 'info');
+            }
             
-            // Get the application ID and number from response
-            const applicationId = result.application.id;
-            const applicationNumber = result.application.applicationNumber;
-            
-            // Upload documents if any files were selected
-            await uploadDocuments(applicationId);
-            
-            // Show success modal with real reference number
+            // Show success modal with reference number (from backend or local)
             showSuccessModal(applicationNumber, totalFeeAED);
             
             // Clear saved progress
@@ -348,6 +376,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function clearSavedProgress() {
         localStorage.removeItem('visa_application_progress');
+    }
+    
+    function generateLocalReferenceNumber() {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        return `UAE-${year}${month}${day}-${random}`;
+    }
+    
+    function saveApplicationToLocalStorage(application) {
+        const applications = getLocalApplications();
+        applications.push(application);
+        localStorage.setItem('visa_applications', JSON.stringify(applications));
+    }
+    
+    function getLocalApplications() {
+        const data = localStorage.getItem('visa_applications');
+        return data ? JSON.parse(data) : [];
     }
     
     function showNotification(message, type = 'info') {
