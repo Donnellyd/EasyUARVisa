@@ -364,7 +364,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Object.keys(formData).forEach(key => {
                 const field = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
-                if (field && formData[key]) {
+                // Skip file inputs - browsers don't allow setting file input values programmatically
+                if (field && formData[key] && field.type !== 'file') {
                     field.value = formData[key];
                 }
             });
