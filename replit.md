@@ -71,4 +71,31 @@ The application follows a traditional multi-page web architecture with separate 
 - Added light green success indicator when documents are uploaded
 - Removed days/time estimates from processing options (now shows "Standard", "Express", "Urgent")
 
-Note: The application currently operates with client-side demo data. Future enhancements may require backend services for real visa application processing, database integration, and API connectivity.
+## Backend Integration
+
+The application is now integrated with the DubaiVisaAI backend portal:
+
+### SDK Integration
+- **SDK File**: `static/visa-portal-sdk.js` - Dubai Visa Portal SDK for backend communication
+- **API Base URL**: `https://workspace.duane16.repl.co`
+- **Features**: Real-time application submission, status tracking, document uploads, payment processing
+
+### Application Submission
+- Form submissions now go directly to the DubaiVisaAI backend via SDK
+- Generates real application numbers from the backend
+- Automatic document upload after successful submission
+- Supports 4 document types: passport photo, passport copy, airline confirmation, hotel booking
+
+### Status Tracking
+- Real-time status checking using email and passport number
+- Auto-refresh every 30 seconds for live updates
+- Maps backend status to visual timeline
+- Status types: open, captured, submitted, processing, approved, declined
+
+### Data Flow
+1. **Form Submission**: User fills application → SDK sends to backend → Returns application number
+2. **Document Upload**: Files stored locally → Uploaded to backend via SDK after submission
+3. **Status Check**: User enters email + passport → SDK queries backend → Displays real-time status
+4. **Auto-Refresh**: Status page automatically checks for updates every 30 seconds
+
+The system no longer relies on localStorage for submissions - all data is managed by the DubaiVisaAI backend.
