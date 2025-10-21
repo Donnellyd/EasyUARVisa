@@ -1,0 +1,496 @@
+/**
+ * Dubai Visa Portal SDK
+ * 
+ * A JavaScript SDK for integrating external websites with the Dubai Visa Portal backend.
+ * This SDK allows external websites to:
+ * - Submit visa applications that appear in the portal
+ * - Track application status in real-time
+ * - Upload documents
+ * - Process payments
+ * 
+ * @version 1.0.0
+ * @license MIT
+ */
+
+class DubaiVisaPortalSDK {
+  /**
+   * Initialize the SDK
+   * @param {Object} config - Configuration object
+   * @param {string} config.apiBaseUrl - Base URL of the portal API (e.g., 'https://your-app.replit.app')
+   * @param {Function} config.onError - Optional global error handler
+   * @param {Function} config.onSuccess - Optional global success handler
+   */
+  constructor(config) {
+    if (!config.apiBaseUrl) {
+      throw new Error('apiBaseUrl is required in config');
+    }
+    
+    this.apiBaseUrl = config.apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.onError = config.onError || ((error) => console.error('SDK Error:', error));
+    this.onSuccess = config.onSuccess || (() => {});
+    this.sessionToken = null;
+  }
+
+  /**
+   * Make an API request
+   * @private
+   */
+  async _request(endpoint, options = {}) {
+    const url = `${this.apiBaseUrl}${endpoint}`;
+    const defaultOptions = {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    };
+
+    try {
+      const response = await fetch(url, { ...defaultOptions, ...options });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      this.onError(error);
+      throw error;
+    }
+  }
+
+  // ============================================
+  // AUTHENTICATION METHODS
+  // ============================================
+
+  /**
+   * Login/authenticate a user
+   * @param {string} email - User's email address
+   * @param {string} passportNumber - User's passport number
+   * @returns {Promise<Object>} Session data
+   */
+  async login(email, passportNumber) {
+    const result = await this._request('/api/website/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, passportNumber })
+    });
+    
+    this.sessionToken = result.sessionToken;
+    this.onSuccess('Login successful');
+    return result;
+  }
+
+  /**
+   * Check if user is authenticated
+   * @returns {Promise<Object>} Session data
+   */
+  async checkSession() {
+    return await this._request('/api/website/session');
+  }
+
+  /**
+   * Logout current user
+   * @returns {Promise<Object>} Success response
+   */
+  async logout() {
+    const result = await this._request('/api/website/logout', {
+      method: 'POST'
+    });
+    
+    this.sessionToken = null;
+    this.onSuccess('Logout successful');
+    return result;
+  }
+
+  // ============================================
+  // APPLICATION METHODS
+  // ============================================
+
+  /**
+   * Submit a new visa application
+   * @param {Object} applicationData - Application details
+   * @returns {Promise<Object>} Created application data
+   */
+  async submitApplication(applicationData) {
+    // Validate required fields
+    const requiredFields = [
+      'firstName', 'lastName', 'dateOfBirth', 'nationality', 'gender',
+      'email', 'passportNumber', 'passportIssueDate', 'passportExpiryDate',
+      'visaType', 'processingTime'
+    ];
+
+    for (const field of requiredFields) {
+      if (!applicationData[field]) {
+        throw new Error(`Missing required field: ${field}`);
+      }
+    }
+
+    // Set defaults
+    const payload = {
+      ...applicationData,
+      applicationFee: applicationData.applicationFee || 35000, // AED 350 in cents
+      serviceFee: applicationData.serviceFee || 5000,          // AED 50 in cents
+      groupReference: applicationData.groupReference || applicationData.email,
+      applicantOrder: applicationData.applicantOrder || 1,
+      source: 'website'
+    };
+
+    const result = await this._request('/api/website/applications', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    this.onSuccess(`Application created: ${result.application.applicationNumber}`);
+    return result;
+  }
+
+  /**
+   * Get all applications for the authenticated user
+   * @returns {Promise<Array>} Array of applications
+   */
+  async getMyApplications() {
+    return await this._request('/api/website/applications');
+  }
+
+  /**
+   * Get applications in a group/family booking
+   * @param {string} groupReference - Group reference (usually email)
+   * @returns {Promise<Array>} Array of applications in the group
+   */
+  async getGroupApplications(groupReference) {
+    return await this._request(`/api/website/applications/group/${encodeURIComponent(groupReference)}`);
+  }
+
+  // ============================================
+  // STATUS TRACKING METHODS (PUBLIC - NO AUTH)
+  // ============================================
+
+  /**
+   * Check application status (public endpoint - no authentication required)
+   * @param {string} email - Applicant's email
+   * @param {string} passportNumber - Applicant's passport number
+   * @returns {Promise<Array>} Array of applications with status
+   */
+  async checkApplicationStatus(email, passportNumber) {
+    return await this._request(
+      `/api/website/status/${encodeURIComponent(email)}/${encodeURIComponent(passportNumber)}`
+    );
+  }
+
+  /**
+   * Track application status with auto-refresh
+   * @param {string} email - Applicant's email
+   * @param {string} passportNumber - Applicant's passport number
+   * @param {Function} callback - Callback function called with updated status
+   * @param {number} interval - Refresh interval in milliseconds (default: 30000 = 30 seconds)
+   * @returns {Function} Stop function to cancel tracking
+   */
+  trackApplicationStatus(email, passportNumber, callback, interval = 30000) {
+    let isTracking = true;
+
+    const checkStatus = async () => {
+      if (!isTracking) return;
+
+      try {
+        const applications = await this.checkApplicationStatus(email, passportNumber);
+        callback(null, applications);
+      } catch (error) {
+        callback(error, null);
+      }
+
+      if (isTracking) {
+        setTimeout(checkStatus, interval);
+      }
+    };
+
+    // Start tracking immediately
+    checkStatus();
+
+    // Return stop function
+    return () => {
+      isTracking = false;
+    };
+  }
+
+  // ============================================
+  // DOCUMENT UPLOAD METHODS
+  // ============================================
+
+  /**
+   * Upload a document for an application
+   * @param {string} applicationId - Application ID
+   * @param {File} file - File object to upload
+   * @param {string} documentType - Type of document (passport, photo, ticket, hotel, other)
+   * @param {Function} onProgress - Optional progress callback
+   * @returns {Promise<Object>} Uploaded document data
+   */
+  async uploadDocument(applicationId, file, documentType, onProgress) {
+    // Validate file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only JPG, PNG, and PDF files are allowed');
+    }
+
+    const maxSize = 3 * 1024 * 1024; // 3MB
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 3MB limit');
+    }
+
+    try {
+      // Step 1: Get upload URL
+      const { uploadURL } = await this._request('/api/website/objects/upload', {
+        method: 'POST'
+      });
+
+      // Step 2: Upload file to storage
+      const uploadResponse = await fetch(uploadURL, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type
+        }
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('File upload failed');
+      }
+
+      // Extract the base URL (remove query parameters)
+      const documentUrl = uploadURL.split('?')[0];
+
+      // Step 3: Save document reference
+      const document = await this._request(
+        `/api/website/applications/${applicationId}/documents`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            type: documentType,
+            originalName: file.name,
+            documentUrl: documentUrl,
+            mimeType: file.type,
+            size: file.size
+          })
+        }
+      );
+
+      this.onSuccess(`Document uploaded: ${file.name}`);
+      return document;
+    } catch (error) {
+      this.onError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload multiple documents
+   * @param {string} applicationId - Application ID
+   * @param {Array<Object>} documents - Array of {file: File, type: string}
+   * @param {Function} onProgress - Optional progress callback
+   * @returns {Promise<Array>} Array of uploaded document data
+   */
+  async uploadDocuments(applicationId, documents, onProgress) {
+    const results = [];
+    
+    for (let i = 0; i < documents.length; i++) {
+      const { file, type } = documents[i];
+      
+      if (onProgress) {
+        onProgress({
+          current: i + 1,
+          total: documents.length,
+          filename: file.name,
+          percentage: ((i + 1) / documents.length) * 100
+        });
+      }
+
+      const result = await this.uploadDocument(applicationId, file, type);
+      results.push(result);
+    }
+
+    return results;
+  }
+
+  // ============================================
+  // PAYMENT METHODS
+  // ============================================
+
+  /**
+   * Initiate payment for an application
+   * @param {string} applicationId - Application ID
+   * @returns {Promise<Object>} Payment data with URL and form fields
+   */
+  async initiatePayment(applicationId) {
+    return await this._request('/api/website/payment/initiate', {
+      method: 'POST',
+      body: JSON.stringify({ applicationId })
+    });
+  }
+
+  /**
+   * Submit payment (redirects to payment gateway)
+   * @param {string} applicationId - Application ID
+   */
+  async submitPayment(applicationId) {
+    const { paymentUrl, paymentData } = await this.initiatePayment(applicationId);
+
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = paymentUrl;
+
+    Object.keys(paymentData).forEach(key => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = paymentData[key];
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+
+  /**
+   * Format amount from cents to currency
+   * @param {number} cents - Amount in cents
+   * @returns {string} Formatted amount (e.g., "AED 400.00")
+   */
+  formatAmount(cents) {
+    return `AED ${(cents / 100).toFixed(2)}`;
+  }
+
+  /**
+   * Format date
+   * @param {string|Date} date - Date to format
+   * @returns {string} Formatted date
+   */
+  formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  /**
+   * Get status color for UI
+   * @param {string} status - Application status
+   * @returns {string} Color code
+   */
+  getStatusColor(status) {
+    const colors = {
+      'open': '#F59E0B',        // Amber
+      'captured': '#3B82F6',    // Blue
+      'submitted': '#3B82F6',   // Blue
+      'processing': '#8B5CF6',  // Purple
+      'approved': '#10B981',    // Green
+      'declined': '#EF4444'     // Red
+    };
+    return colors[status] || '#6B7280'; // Gray default
+  }
+
+  /**
+   * Get status label
+   * @param {string} status - Application status
+   * @returns {string} Human-readable status
+   */
+  getStatusLabel(status) {
+    const labels = {
+      'open': 'Awaiting Payment',
+      'captured': 'Payment Received',
+      'submitted': 'Under Verification',
+      'processing': 'Processing Visa',
+      'approved': 'Approved',
+      'declined': 'Declined'
+    };
+    return labels[status] || status;
+  }
+
+  /**
+   * Calculate application progress percentage
+   * @param {string} status - Application status
+   * @returns {number} Progress percentage (0-100)
+   */
+  getProgressPercentage(status) {
+    const progress = {
+      'open': 25,
+      'captured': 50,
+      'submitted': 50,
+      'processing': 75,
+      'approved': 100,
+      'declined': 100
+    };
+    return progress[status] || 0;
+  }
+
+  /**
+   * Validate passport number format
+   * @param {string} passportNumber - Passport number to validate
+   * @returns {boolean} True if valid
+   */
+  validatePassportNumber(passportNumber) {
+    // Basic validation: alphanumeric, 6-9 characters
+    const regex = /^[A-Z0-9]{6,9}$/i;
+    return regex.test(passportNumber);
+  }
+
+  /**
+   * Validate email format
+   * @param {string} email - Email to validate
+   * @returns {boolean} True if valid
+   */
+  validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
+  /**
+   * Validate date is in future
+   * @param {string} date - Date string (YYYY-MM-DD)
+   * @returns {boolean} True if date is in future
+   */
+  validateFutureDate(date) {
+    const inputDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return inputDate >= today;
+  }
+
+  /**
+   * Validate passport expiry (must be valid for at least 6 months)
+   * @param {string} expiryDate - Passport expiry date (YYYY-MM-DD)
+   * @returns {boolean} True if valid for 6+ months
+   */
+  validatePassportExpiry(expiryDate) {
+    const expiry = new Date(expiryDate);
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+    return expiry >= sixMonthsFromNow;
+  }
+}
+
+// ============================================
+// EXPORT FOR DIFFERENT MODULE SYSTEMS
+// ============================================
+
+// CommonJS
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DubaiVisaPortalSDK;
+}
+
+// AMD
+if (typeof define === 'function' && define.amd) {
+  define([], function() {
+    return DubaiVisaPortalSDK;
+  });
+}
+
+// Browser global
+if (typeof window !== 'undefined') {
+  window.DubaiVisaPortalSDK = DubaiVisaPortalSDK;
+}
