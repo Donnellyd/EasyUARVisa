@@ -1,6 +1,6 @@
 # Overview
 
-EasyUAEVisa is a static web application that serves as a UAE visa application portal. The application provides a complete user interface for visa applications, status tracking, and information display. It's designed as a frontend-only solution with client-side functionality for form handling, validation, and demo data presentation.
+UAE VISA is a Flask-based web application serving as the official UAE visa application portal. The application provides a complete user interface for visa applications, status tracking, and information display with a beautiful, professional design featuring UAE national colors.
 
 # User Preferences
 
@@ -22,7 +22,12 @@ The application follows a traditional multi-page web architecture with separate 
 - **Form Validation**: Client-side validation with custom rules and error messaging system
 
 ## User Interface Design
-- **UAE Theme**: Design system based on UAE national colors (red, green, white, black) with professional styling
+- **UAE Color Theme**: Design system exclusively using UAE national colors (red, green, white, black, grey) - NO BLUE
+- **Black Header**: Professional black navigation header with UAE flag icon
+- **Red Accent Pricing**: All visa prices displayed in red (#c8102e) for emphasis
+- **Dark Grey Headings**: Main headings and text in dark grey (#333333) for readability
+- **Black Buttons & Icons**: All call-to-action buttons and service icons use black gradient
+- **Clean Hero Section**: Full Sheikh Zayed Grand Mosque background without card overlay
 - **Progressive Enhancement**: Base functionality works without JavaScript, enhanced with interactive features
 - **Accessibility**: Semantic HTML structure with proper form labels and ARIA attributes
 
@@ -45,6 +50,15 @@ The application follows a traditional multi-page web architecture with separate 
 
 ## Development Tools
 - **Replit Environment**: Hosted development environment with automatic deployment
-- **Static File Serving**: Simple HTTP server for static asset delivery
+- **Flask Backend**: Python-based web framework serving the application
+- **Gunicorn**: Production-ready WSGI server
 
-Note: The application currently operates as a frontend-only solution with demo data. Future enhancements may require backend services for real visa application processing, database integration, and API connectivity.
+## Recent Changes (October 21, 2025)
+- Removed Tourist Visa card from hero section for cleaner design
+- Eliminated all blue colors from the application - pure UAE color scheme
+- Changed all main headings to dark grey (#333333)
+- Buttons and icons changed from red back to black for professional look
+- Visa prices remain in red for visual emphasis
+- Clean, unobstructed Sheikh Zayed Grand Mosque hero background
+
+Note: The application currently operates with client-side demo data. Future enhancements may require backend services for real visa application processing, database integration, and API connectivity.
