@@ -1,3 +1,14 @@
+// Initialize Dubai Visa Portal SDK
+const sdk = new DubaiVisaPortalSDK({
+    apiBaseUrl: 'https://workspace.duane16.repl.co',
+    onError: (error) => {
+        console.error('SDK Error:', error);
+    },
+    onSuccess: (message) => {
+        console.log('SDK Success:', message);
+    }
+});
+
 // Visa Application Form Handler
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('visaApplicationForm');
@@ -8,14 +19,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalFeeElement = document.getElementById('totalFee');
     const saveProgressBtn = document.getElementById('saveProgress');
     
-    // Standardized visa fees in AED (same for all nationalities)
+    // Visa type mapping for SDK
+    const visaTypeMapping = {
+        'single-30': 'single-entry-30',
+        'multiple-30': 'multiple-entry-30',
+        'single-60': 'single-entry-60',
+        'multiple-60': 'multiple-entry-60'
+    };
+    
+    // Visa fees in AED
     const visaBaseFees = {
-        'tourist-30-single': 636,      // AED 636.00
-        'tourist-30-multiple': 1203,   // AED 1,203.00
-        'tourist-60-single': 1031,     // AED 1,031.00
-        'tourist-60-multiple': 1980,   // AED 1,980.00
-        'business-30': 1200,           // AED 1,200.00
-        'transit-96': 200              // AED 200.00
+        'single-30': 636,
+        'multiple-30': 1203,
+        'single-60': 1031,
+        'multiple-60': 1426
     };
     
     // Processing fees
@@ -28,25 +45,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Service fee (fixed)
     const serviceFee = 50;
     
-    // Country to currency mapping
-    const countryCurrencies = {
-        'BW': { code: 'BWP', symbol: 'P', name: 'Botswana Pula' },
-        'KM': { code: 'KMF', symbol: 'CF', name: 'Comorian Franc' },
-        'SZ': { code: 'SZL', symbol: 'E', name: 'Swazi Lilangeni' },
-        'LS': { code: 'LSL', symbol: 'L', name: 'Lesotho Loti' },
-        'MG': { code: 'MGA', symbol: 'Ar', name: 'Malagasy Ariary' },
-        'MW': { code: 'MWK', symbol: 'MK', name: 'Malawian Kwacha' },
-        'MZ': { code: 'MZN', symbol: 'MT', name: 'Mozambican Metical' },
-        'NA': { code: 'NAD', symbol: 'N$', name: 'Namibian Dollar' },
-        'ZA': { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
-        'TZ': { code: 'TZS', symbol: 'TSh', name: 'Tanzanian Shilling' },
-        'ZM': { code: 'ZMW', symbol: 'ZK', name: 'Zambian Kwacha' },
-        'ZW': { code: 'USD', symbol: '$', name: 'US Dollar' }
-    };
-    
     // Exchange rates cache
     let exchangeRates = {};
     let ratesLastFetched = null;
+    
+    // Store uploaded files
+    const uploadedFiles = {
+        passport: null,
+        photo: null,
+        airline: null,
+        hotel: null
+    };
     
     // Load saved progress if exists
     loadSavedProgress();
@@ -61,11 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save progress button
     saveProgressBtn?.addEventListener('click', saveProgress);
     
-    // Form submission handler
-    form?.addEventListener('submit', function(e) {
+    // Form submission handler - NOW SUBMITS TO BACKEND
+    form?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        console.log('Form submitted'); // Debug log
+        console.log('Form submitted');
         
         // Validate form
         if (!validateForm()) {
@@ -73,71 +82,119 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        console.log('Validation passed'); // Debug log
+        console.log('Validation passed');
         
-        // Collect form data
-        const formData = collectFormData();
+        // Disable submit button
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         
-        // Generate reference number
-        const reference = generateReferenceNumber();
-        
-        // Calculate total fee
-        const totalFee = calculateTotalFee();
-        
-        console.log('Reference:', reference, 'Total Fee:', totalFee); // Debug log
-        
-        // Create application object
-        const application = {
-            reference: reference,
-            personalInfo: {
+        try {
+            // Collect form data
+            const formData = collectFormData();
+            
+            // Calculate total fee in cents (SDK expects cents)
+            const totalFeeAED = calculateTotalFee();
+            const visaFeeAED = parseFloat(visaFeeElement.textContent.replace('AED ', '').replace(',', ''));
+            const processingFeeAED = processingFees[formData.processingTime] || 0;
+            
+            // Prepare application data for SDK
+            const applicationData = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 dateOfBirth: formData.dateOfBirth,
-                gender: formData.gender
-            },
-            contactInfo: {
+                gender: formData.gender,
+                nationality: formData.country || 'Not Specified', // Use country as nationality fallback
                 email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                city: formData.city,
-                country: formData.country,
-                postalCode: formData.postalCode
-            },
-            passportInfo: {
-                number: formData.passportNumber,
-                issueDate: formData.passportIssueDate,
-                expiryDate: formData.passportExpiryDate,
-                placeOfIssue: formData.passportPlaceOfIssue
-            },
-            visaInfo: {
-                type: formData.visaType,
+                phone: formData.phone || '',
+                passportNumber: formData.passportNumber,
+                passportIssueDate: formData.passportIssueDate,
+                passportExpiryDate: formData.passportExpiryDate,
+                passportPlaceOfIssue: formData.passportPlaceOfIssue || '',
+                visaType: visaTypeMapping[formData.visaType] || formData.visaType,
                 processingTime: formData.processingTime,
-                entryDate: formData.entryDate,
-                exitDate: formData.exitDate
-            },
-            fees: {
-                visaFee: parseFloat(visaFeeElement.textContent.replace('AED ', '').replace(',', '')),
-                serviceFee: serviceFee,
-                totalFee: totalFee
-            },
-            status: 'submitted',
-            submissionDate: new Date().toISOString().split('T')[0],
-            expectedDate: calculateExpectedDate(formData.processingTime)
-        };
-        
-        // Save application to localStorage
-        saveApplication(application);
-        
-        // Show success modal
-        showSuccessModal(reference, totalFee);
-        
-        // Clear saved progress
-        clearSavedProgress();
-        
-        // Reset form
-        form.reset();
-        calculateFees();
+                entryDate: formData.entryDate || '',
+                exitDate: formData.exitDate || '',
+                applicationFee: Math.round(visaFeeAED * 100), // Convert to cents
+                serviceFee: Math.round(processingFeeAED * 100), // Processing fee goes here
+                totalAmount: Math.round(totalFeeAED * 100) // Total in cents
+            };
+            
+            console.log('Submitting application:', applicationData);
+            
+            // Submit application via SDK
+            const result = await sdk.submitApplication(applicationData);
+            
+            console.log('Application submitted successfully:', result);
+            
+            // Get the application ID and number from response
+            const applicationId = result.application.id;
+            const applicationNumber = result.application.applicationNumber;
+            
+            // Upload documents if any files were selected
+            await uploadDocuments(applicationId);
+            
+            // Show success modal with real reference number
+            showSuccessModal(applicationNumber, totalFeeAED);
+            
+            // Clear saved progress
+            clearSavedProgress();
+            
+            // Reset form
+            form.reset();
+            calculateFees();
+            
+            // Clear uploaded files
+            Object.keys(uploadedFiles).forEach(key => uploadedFiles[key] = null);
+            
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            alert('Error submitting application: ' + error.message + '\n\nPlease try again or contact support.');
+        } finally {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
     });
+    
+    async function uploadDocuments(applicationId) {
+        const documentsToUpload = [];
+        
+        // Map uploaded files to document types
+        if (uploadedFiles.passport) {
+            documentsToUpload.push({ file: uploadedFiles.passport, type: 'passport' });
+        }
+        if (uploadedFiles.photo) {
+            documentsToUpload.push({ file: uploadedFiles.photo, type: 'photo' });
+        }
+        if (uploadedFiles.airline) {
+            documentsToUpload.push({ file: uploadedFiles.airline, type: 'ticket' });
+        }
+        if (uploadedFiles.hotel) {
+            documentsToUpload.push({ file: uploadedFiles.hotel, type: 'hotel' });
+        }
+        
+        if (documentsToUpload.length === 0) {
+            console.log('No documents to upload');
+            return;
+        }
+        
+        console.log(`Uploading ${documentsToUpload.length} documents...`);
+        
+        try {
+            // Upload documents using SDK
+            await sdk.uploadDocuments(applicationId, documentsToUpload, (progress) => {
+                console.log(`Upload progress: ${progress.percentage}% - ${progress.filename}`);
+            });
+            
+            console.log('All documents uploaded successfully');
+        } catch (error) {
+            console.error('Error uploading documents:', error);
+            // Don't fail the whole submission if documents fail
+            alert('Application submitted but some documents failed to upload. You can upload them later.');
+        }
+    }
     
     function calculateFees() {
         const visaType = visaTypeSelect?.value;
@@ -145,7 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let visaFee = 0;
         
-        // Use standardized visa pricing
         if (visaType && visaBaseFees[visaType]) {
             visaFee = visaBaseFees[visaType];
         }
@@ -169,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function calculateTotalFee() {
-        // Extract just the AED amount, ignoring any converted currency in parentheses
         const text = totalFeeElement.textContent;
         const aedMatch = text.match(/AED\s+([\d,.]+)/);
         if (aedMatch) {
@@ -179,7 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function validateForm() {
-        // Basic validation
         const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
         
@@ -221,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (!isValid) {
-            // Scroll to first error
             const firstError = form.querySelector('[style*="border-color: rgb(220, 53, 69)"]');
             if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -246,42 +299,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return formData;
     }
     
-    function generateReferenceNumber() {
-        const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
-        return `UAE-${year}-${random}`;
-    }
-    
-    function calculateExpectedDate(processingTime) {
-        const today = new Date();
-        let daysToAdd = 3; // default
-        
-        if (processingTime === 'express') daysToAdd = 1;
-        else if (processingTime === 'urgent') daysToAdd = 0;
-        else if (processingTime === 'standard') daysToAdd = 3;
-        
-        today.setDate(today.getDate() + daysToAdd);
-        return today.toISOString().split('T')[0];
-    }
-    
-    function saveApplication(application) {
-        // Get existing applications
-        const applications = JSON.parse(localStorage.getItem('visa_applications') || '[]');
-        
-        // Add new application
-        applications.push(application);
-        
-        // Save back to localStorage
-        localStorage.setItem('visa_applications', JSON.stringify(applications));
-    }
-    
     function showSuccessModal(reference, totalFee) {
-        console.log('Showing modal with reference:', reference, 'fee:', totalFee); // Debug log
+        console.log('Showing modal with reference:', reference, 'fee:', totalFee);
         
         // Update modal content
         document.getElementById('applicationRef').textContent = reference;
         
-        // Update modal to show AED
         const modalFeeElement = document.getElementById('modalTotalFee');
         if (modalFeeElement) {
             modalFeeElement.textContent = 'AED ' + totalFee.toFixed(2);
@@ -302,8 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveProgress() {
         const formData = collectFormData();
         localStorage.setItem('visa_application_progress', JSON.stringify(formData));
-        
-        // Show notification
         showNotification('Progress saved successfully!', 'success');
     }
     
@@ -313,7 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (savedData) {
             const formData = JSON.parse(savedData);
             
-            // Populate form fields
             Object.keys(formData).forEach(key => {
                 const field = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
                 if (field && formData[key]) {
@@ -321,10 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Recalculate fees
             calculateFees();
-            
-            // Show notification
             showNotification('Previous progress restored', 'info');
         }
     }
@@ -334,7 +351,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
@@ -342,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <span>${message}</span>
         `;
         
-        // Style the notification
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -362,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(notification);
         
-        // Remove notification after 3 seconds
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease-out';
             setTimeout(() => {
@@ -373,16 +387,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // File upload handlers
+    // File upload handlers - Store files for later upload
     const fileInputs = document.querySelectorAll('input[type="file"]');
     fileInputs.forEach(input => {
         input.addEventListener('change', function(e) {
             const file = e.target.files[0];
             const uploadItem = e.target.closest('.upload-item');
             const fileInfo = uploadItem.querySelector('.file-info');
+            const inputName = e.target.name;
             
             if (file) {
-                const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+                // Store file for upload after form submission
+                uploadedFiles[inputName] = file;
+                
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
                 fileInfo.innerHTML = `
                     <div class="file-selected">
                         <i class="fas fa-check-circle"></i>
@@ -390,8 +408,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 fileInfo.style.display = 'block';
-                
-                // Add uploaded class for green success styling
                 uploadItem.classList.add('uploaded');
             }
         });
@@ -400,13 +416,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch exchange rates from API
     async function fetchExchangeRates() {
         try {
-            // Check if rates are cached and still fresh (within 24 hours)
             const now = new Date().getTime();
             if (ratesLastFetched && (now - ratesLastFetched < 24 * 60 * 60 * 1000)) {
-                return; // Use cached rates
+                return;
             }
             
-            // Fetch from exchangerate-api.com (free tier, no key required)
             const response = await fetch('https://api.exchangerate-api.com/v4/latest/AED');
             if (!response.ok) throw new Error('Failed to fetch rates');
             
@@ -417,13 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Exchange rates loaded successfully');
         } catch (error) {
             console.error('Error fetching exchange rates:', error);
-            // Rates will remain empty, and conversion won't display
         }
-    }
-    
-    function updateCurrencyDisplay() {
-        // Simply recalculate fees which will update the currency display
-        calculateFees();
     }
     
     // Currency Converter Calculator
@@ -450,7 +458,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const rate = exchangeRates[currency];
         const converted = (amount * rate).toFixed(2);
         
-        // Get currency symbol
         const symbols = {
             'ZAR': 'R', 'BWP': 'P', 'NAD': 'N$', 'TZS': 'TSh',
             'ZMW': 'ZK', 'MZN': 'MT', 'USD': '$', 'MWK': 'MK',
@@ -464,13 +471,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     converterAmount?.addEventListener('input', updateConverterResult);
     converterCurrency?.addEventListener('change', updateConverterResult);
-    
-    // Update converter when exchange rates are loaded
-    const originalFetchRates = fetchExchangeRates;
-    fetchExchangeRates = async function() {
-        await originalFetchRates();
-        updateConverterResult();
-    };
     
     // Initial calculation
     calculateFees();
