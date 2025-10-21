@@ -43,8 +43,12 @@
                 <form id="statusSearchForm" class="status-search">
                     <div class="search-input-group">
                         <div class="input-wrapper">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="applicationReference" placeholder="Enter Application Reference Number" required>
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="applicantEmail" placeholder="Enter Email Address" required>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-passport"></i>
+                            <input type="text" id="applicantPassport" placeholder="Enter Passport Number" required>
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i>
@@ -52,7 +56,7 @@
                         </button>
                     </div>
                     <div class="search-help">
-                        <small>Example: UAE-2024-001234</small>
+                        <small>Enter the email and passport number used during application</small>
                     </div>
                 </form>
             </div>

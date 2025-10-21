@@ -1,102 +1,55 @@
+// Initialize Dubai Visa Portal SDK
+const sdk = new DubaiVisaPortalSDK({
+    apiBaseUrl: 'https://workspace.duane16.repl.co',
+    onError: (error) => {
+        console.error('SDK Error:', error);
+    },
+    onSuccess: (message) => {
+        console.log('SDK Success:', message);
+    }
+});
+
 // Status tracking functionality
 document.addEventListener('DOMContentLoaded', function() {
     const statusForm = document.getElementById('statusSearchForm');
     const applicationRefInput = document.getElementById('applicationReference');
+    const emailInput = document.getElementById('applicantEmail');
+    const passportInput = document.getElementById('applicantPassport');
     const statusResults = document.getElementById('statusResults');
     const errorMessage = document.getElementById('errorMessage');
-    const recentApplications = document.getElementById('recentApplications');
     
-    // Sample statuses for demonstration
-    const sampleStatuses = {
-        'UAE-2024-123456': {
-            reference: 'UAE-2024-123456',
-            status: 'approved',
-            applicantName: 'John Smith',
-            visaType: 'Tourist Visa - 30 Days Single Entry',
-            nationality: 'United States',
-            processingType: 'Express (1-2 days)',
-            submissionDate: '2024-01-15',
-            expectedDate: '2024-01-17',
-            timeline: {
-                submitted: { date: '2024-01-15 10:30 AM', completed: true },
-                review: { date: '2024-01-15 2:15 PM', completed: true },
-                processing: { date: '2024-01-16 9:00 AM', completed: true },
-                approved: { date: '2024-01-16 4:45 PM', completed: true }
-            }
-        },
-        'UAE-2024-789012': {
-            reference: 'UAE-2024-789012',
-            status: 'processing',
-            applicantName: 'Sarah Johnson',
-            visaType: 'Business Visa - 30 Days',
-            nationality: 'United Kingdom',
-            processingType: 'Standard (3-5 days)',
-            submissionDate: '2024-01-14',
-            expectedDate: '2024-01-19',
-            timeline: {
-                submitted: { date: '2024-01-14 3:20 PM', completed: true },
-                review: { date: '2024-01-15 11:30 AM', completed: true },
-                processing: { date: '2024-01-16 8:15 AM', completed: false, active: true },
-                approved: { date: '', completed: false }
-            }
-        },
-        'UAE-2024-345678': {
-            reference: 'UAE-2024-345678',
-            status: 'review',
-            applicantName: 'Ahmed Hassan',
-            visaType: 'Tourist Visa - 90 Days Single Entry',
-            nationality: 'Canada',
-            processingType: 'Urgent (Same day)',
-            submissionDate: '2024-01-16',
-            expectedDate: '2024-01-16',
-            timeline: {
-                submitted: { date: '2024-01-16 1:45 PM', completed: true },
-                review: { date: '2024-01-16 2:30 PM', completed: false, active: true },
-                processing: { date: '', completed: false },
-                approved: { date: '', completed: false }
-            }
-        }
-    };
+    let stopTracking = null; // Track auto-refresh
     
-    // Load recent applications on page load
-    loadRecentApplications();
-    
-    // Form submission handler
-    statusForm?.addEventListener('submit', function(e) {
+    // Form submission handler - NOW USES REAL API
+    statusForm?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const reference = applicationRefInput.value.trim().toUpperCase();
+        // Stop any existing tracking
+        if (stopTracking) {
+            stopTracking();
+            stopTracking = null;
+        }
         
-        if (!reference) {
-            showError('Please enter an application reference number');
+        const email = emailInput?.value.trim();
+        const passport = passportInput?.value.trim();
+        
+        if (!email || !passport) {
+            showError('Please enter both email and passport number');
             return;
         }
         
-        // Validate reference format
-        if (!isValidReferenceFormat(reference)) {
-            showError('Invalid reference format. Reference should be in format: UAE-YYYY-XXXXXX');
-            return;
-        }
-        
-        // Search for application
-        searchApplication(reference);
-    });
-    
-    // Add click handlers for recent applications
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.recent-app-item')) {
-            const reference = e.target.closest('.recent-app-item').dataset.reference;
-            applicationRefInput.value = reference;
-            searchApplication(reference);
-        }
+        // Search for application using SDK
+        await searchApplicationByCredentials(email, passport);
     });
     
     // Refresh status button handler
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', async function(e) {
         if (e.target.closest('#refreshStatus')) {
-            const currentRef = document.getElementById('displayReference')?.textContent;
-            if (currentRef) {
-                searchApplication(currentRef);
+            const email = emailInput?.value.trim();
+            const passport = passportInput?.value.trim();
+            
+            if (email && passport) {
+                await searchApplicationByCredentials(email, passport);
             }
         }
     });
@@ -108,77 +61,94 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    function isValidReferenceFormat(reference) {
-        const pattern = /^UAE-\d{4}-\d{6}$/;
-        return pattern.test(reference);
-    }
-    
-    function searchApplication(reference) {
-        // Hide previous results
+    async function searchApplicationByCredentials(email, passport) {
         hideResults();
-        
-        // Show loading state
         showLoading();
         
-        // Simulate API delay
-        setTimeout(() => {
+        try {
+            console.log('Searching for applications:', email, passport);
+            
+            // Check application status via SDK
+            const applications = await sdk.checkApplicationStatus(email, passport);
+            
             hideLoading();
             
-            // Check local storage first
-            const localApplications = JSON.parse(localStorage.getItem('visa_applications') || '[]');
-            const localApp = localApplications.find(app => app.reference === reference);
-            
-            if (localApp) {
-                displayApplicationStatus(localApp);
+            if (!applications || applications.length === 0) {
+                showNotFound();
                 return;
             }
             
-            // Check sample data
-            const sampleApp = sampleStatuses[reference];
-            if (sampleApp) {
-                displayApplicationStatus(sampleApp);
-                return;
-            }
+            // Display the first application (or most recent)
+            displayApplicationStatus(applications[0]);
             
-            // Application not found
-            showNotFound();
-        }, 1500);
+            // Start auto-refresh for status updates (every 30 seconds)
+            startAutoRefresh(email, passport);
+            
+        } catch (error) {
+            hideLoading();
+            console.error('Error searching application:', error);
+            showError('Error checking application status: ' + error.message);
+        }
     }
     
-    function displayApplicationStatus(application) {
+    function startAutoRefresh(email, passport) {
+        // Stop existing tracker if any
+        if (stopTracking) {
+            stopTracking();
+        }
+        
+        // Start tracking with SDK (auto-refreshes every 30 seconds)
+        stopTracking = sdk.trackApplicationStatus(
+            email,
+            passport,
+            (error, applications) => {
+                if (error) {
+                    console.error('Auto-refresh error:', error);
+                    return;
+                }
+                
+                if (applications && applications.length > 0) {
+                    // Silently update the display without showing loading
+                    displayApplicationStatus(applications[0], true);
+                }
+            },
+            30000 // 30 seconds
+        );
+        
+        console.log('Auto-refresh enabled (every 30 seconds)');
+    }
+    
+    function displayApplicationStatus(application, silent = false) {
         hideError();
         
+        if (!silent) {
+            console.log('Displaying application:', application);
+        }
+        
         // Populate basic information
-        document.getElementById('displayReference').textContent = application.reference;
-        document.getElementById('applicantName').textContent = 
-            application.personalInfo ? 
-            `${application.personalInfo.firstName} ${application.personalInfo.lastName}` :
-            application.applicantName;
+        document.getElementById('displayReference').textContent = application.applicationNumber || 'N/A';
+        document.getElementById('applicantName').textContent = application.fullName || 'N/A';
         
-        document.getElementById('visaType').textContent = 
-            application.visaInfo ? getVisaTypeLabel(application.visaInfo.type) : application.visaType;
-        
-        document.getElementById('nationality').textContent = 
-            application.personalInfo ? 
-            getNationalityLabel(application.personalInfo.nationality) :
-            application.nationality;
+        // Map visa type
+        document.getElementById('visaType').textContent = getVisaTypeLabel(application.visaType);
         
         document.getElementById('processingType').textContent = 
-            application.visaInfo ? getProcessingTypeLabel(application.visaInfo.processingTime) : application.processingType;
+            getProcessingTypeLabel(application.processingTime);
         
         document.getElementById('submissionDate').textContent = 
-            formatDate(application.submissionDate || application.submissionDate);
+            formatDate(application.createdAt);
         
         document.getElementById('expectedDate').textContent = 
-            application.expectedDate || calculateExpectedDate(application.submissionDate, application.visaInfo?.processingTime);
+            application.expectedCompletionDate ? formatDate(application.expectedCompletionDate) : 'TBD';
         
-        // Set current status
+        // Set current status badge
         const statusBadge = document.getElementById('currentStatus');
-        statusBadge.textContent = getStatusLabel(application.status);
-        statusBadge.className = `status-badge ${application.status}`;
+        const statusLabel = sdk.getStatusLabel(application.status);
+        statusBadge.textContent = statusLabel;
+        statusBadge.className = `status-badge status-${application.status}`;
         
-        // Update timeline
-        updateTimeline(application);
+        // Update timeline based on status
+        updateTimelineFromStatus(application.status);
         
         // Show/hide download button
         const downloadBtn = document.getElementById('downloadVisa');
@@ -191,113 +161,76 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show results
         statusResults.style.display = 'block';
         
-        // Scroll to results
-        statusResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scroll to results (only if not silent update)
+        if (!silent) {
+            statusResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
     
-    function updateTimeline(application) {
-        const steps = ['submitted', 'review', 'processing', 'approved'];
-        const timeline = application.timeline || generateTimelineFromStatus(application);
+    function updateTimelineFromStatus(status) {
+        // Map SDK status to timeline steps
+        const statusMapping = {
+            'open': 1,           // Application submitted
+            'captured': 2,       // Payment received (review)
+            'submitted': 2,      // Under review
+            'processing': 3,     // Processing
+            'approved': 4,       // Approved
+            'declined': 4        // Declined
+        };
         
-        steps.forEach(step => {
-            const stepElement = document.getElementById(`${step}-step`);
-            const dateElement = document.getElementById(`${step}-date`);
+        const currentStep = statusMapping[status] || 1;
+        
+        // Update timeline steps
+        const steps = [
+            { id: 'submitted-step', step: 1 },
+            { id: 'review-step', step: 2 },
+            { id: 'processing-step', step: 3 },
+            { id: 'approved-step', step: 4 }
+        ];
+        
+        steps.forEach(({ id, step }) => {
+            const stepElement = document.getElementById(id);
+            if (!stepElement) return;
             
-            if (timeline[step]) {
-                if (timeline[step].completed) {
-                    stepElement.classList.add('completed');
-                    stepElement.classList.remove('active');
-                } else if (timeline[step].active) {
-                    stepElement.classList.add('active');
-                    stepElement.classList.remove('completed');
-                } else {
-                    stepElement.classList.remove('completed', 'active');
-                }
-                
-                if (dateElement) {
-                    dateElement.textContent = timeline[step].date || '';
-                }
+            if (step < currentStep) {
+                // Completed steps
+                stepElement.classList.add('completed');
+                stepElement.classList.remove('active');
+            } else if (step === currentStep) {
+                // Current step
+                stepElement.classList.add('active');
+                stepElement.classList.remove('completed');
+            } else {
+                // Future steps
+                stepElement.classList.remove('completed', 'active');
             }
         });
     }
     
-    function generateTimelineFromStatus(application) {
-        const submissionDate = new Date(application.submissionDate);
-        const timeline = {
-            submitted: { 
-                date: formatDateTime(submissionDate), 
-                completed: true 
-            },
-            review: { 
-                date: application.status === 'submitted' ? '' : formatDateTime(addHours(submissionDate, 2)),
-                completed: ['review', 'processing', 'approved'].includes(application.status),
-                active: application.status === 'review'
-            },
-            processing: {
-                date: ['processing', 'approved'].includes(application.status) ? formatDateTime(addHours(submissionDate, 24)) : '',
-                completed: application.status === 'approved',
-                active: application.status === 'processing'
-            },
-            approved: {
-                date: application.status === 'approved' ? formatDateTime(addHours(submissionDate, 48)) : '',
-                completed: application.status === 'approved'
-            }
-        };
-        
-        return timeline;
-    }
-    
     function getVisaTypeLabel(type) {
         const types = {
-            'tourist-30-single': 'Tourist Visa - 30 Days Single Entry',
-            'tourist-30-multiple': 'Tourist Visa - 30 Days Multiple Entry',
-            'tourist-60-single': 'Tourist Visa - 60 Days Single Entry',
-            'tourist-60-multiple': 'Tourist Visa - 60 Days Multiple Entry',
-            'business-30': 'Business Visa - 30 Days',
-            'transit-96': 'Transit Visa - 96 Hours'
+            'single-entry-30': 'Single Entry 30 Days',
+            'multiple-entry-30': 'Multiple Entry 30 Days',
+            'single-entry-60': 'Single Entry 60 Days',
+            'multiple-entry-60': 'Multiple Entry 60 Days',
+            'tourist': 'Tourist Visa',
+            'business': 'Business Visa',
+            'transit': 'Transit Visa'
         };
         return types[type] || type;
     }
     
     function getProcessingTypeLabel(type) {
         const types = {
-            'standard': 'Standard (3-5 days)',
-            'express': 'Express (1-2 days)',
-            'urgent': 'Urgent (Same day)'
+            'standard': 'Standard',
+            'express': 'Express',
+            'urgent': 'Urgent'
         };
         return types[type] || type;
     }
     
-    function getNationalityLabel(code) {
-        const countries = {
-            'BW': 'Botswana',
-            'KM': 'Comoros',
-            'SZ': 'Eswatini (Swaziland)',
-            'LS': 'Lesotho',
-            'MG': 'Madagascar',
-            'MW': 'Malawi',
-            'MZ': 'Mozambique',
-            'NA': 'Namibia',
-            'ZA': 'South Africa',
-            'TZ': 'Tanzania',
-            'ZM': 'Zambia',
-            'ZW': 'Zimbabwe'
-        };
-        return countries[code] || code;
-    }
-    
-    function getStatusLabel(status) {
-        const labels = {
-            'submitted': 'Submitted',
-            'review': 'Under Review',
-            'processing': 'Processing',
-            'approved': 'Approved',
-            'rejected': 'Rejected'
-        };
-        return labels[status] || status;
-    }
-    
     function formatDate(dateString) {
+        if (!dateString) return 'N/A';
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -306,144 +239,110 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function formatDateTime(date) {
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }) + ' ' + date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-    }
-    
-    function addHours(date, hours) {
-        const result = new Date(date);
-        result.setHours(result.getHours() + hours);
-        return result;
-    }
-    
-    function calculateExpectedDate(submissionDate, processingType) {
-        const submission = new Date(submissionDate);
-        let daysToAdd = 3; // default
-        
-        if (processingType === 'express') daysToAdd = 1;
-        else if (processingType === 'urgent') daysToAdd = 0;
-        else if (processingType === 'standard') daysToAdd = 3;
-        
-        submission.setDate(submission.getDate() + daysToAdd);
-        return formatDate(submission);
-    }
-    
     function showLoading() {
         const searchBtn = statusForm.querySelector('button[type="submit"]');
         const originalHTML = searchBtn.innerHTML;
         
-        searchBtn.innerHTML = '<div class="loading"></div> Searching...';
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
         searchBtn.disabled = true;
-        
-        // Store original HTML for restoration
         searchBtn.dataset.originalHTML = originalHTML;
     }
     
     function hideLoading() {
         const searchBtn = statusForm.querySelector('button[type="submit"]');
-        searchBtn.innerHTML = searchBtn.dataset.originalHTML;
+        if (searchBtn.dataset.originalHTML) {
+            searchBtn.innerHTML = searchBtn.dataset.originalHTML;
+        }
         searchBtn.disabled = false;
     }
     
     function hideResults() {
         statusResults.style.display = 'none';
-        errorMessage.style.display = 'none';
+        if (errorMessage) {
+            errorMessage.style.display = 'none';
+        }
     }
     
     function showNotFound() {
         hideResults();
-        errorMessage.style.display = 'block';
-        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showError('No applications found with the provided email and passport number.');
     }
     
     function hideError() {
-        errorMessage.style.display = 'none';
+        if (errorMessage) {
+            errorMessage.style.display = 'none';
+        }
+        
+        // Also remove any inline errors
+        const existingError = statusForm?.querySelector('.alert-danger');
+        if (existingError) {
+            existingError.remove();
+        }
     }
     
     function showError(message) {
         // Create temporary error message
         const tempError = document.createElement('div');
-        tempError.className = 'alert alert-danger mt-2';
-        tempError.textContent = message;
+        tempError.className = 'alert alert-danger mt-3';
+        tempError.style.cssText = `
+            padding: 1rem;
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            color: #991b1b;
+            margin-top: 1rem;
+        `;
+        tempError.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <span>${message}</span>
+        `;
         
         // Remove any existing error
-        const existingError = statusForm.querySelector('.alert-danger');
+        const existingError = statusForm?.querySelector('.alert-danger');
         if (existingError) {
             existingError.remove();
         }
         
         // Add new error
-        statusForm.appendChild(tempError);
-        
-        // Remove after 5 seconds
-        setTimeout(() => {
-            if (tempError.parentNode) {
-                tempError.remove();
-            }
-        }, 5000);
-    }
-    
-    function loadRecentApplications() {
-        const applications = JSON.parse(localStorage.getItem('visa_applications') || '[]');
-        
-        if (applications.length === 0) return;
-        
-        const recentAppsList = recentApplications.querySelector('.recent-apps-list');
-        recentAppsList.innerHTML = '';
-        
-        // Show last 3 applications
-        const recentApps = applications.slice(-3).reverse();
-        
-        recentApps.forEach(app => {
-            const appElement = document.createElement('div');
-            appElement.className = 'recent-app-item';
-            appElement.dataset.reference = app.reference;
+        if (statusForm) {
+            statusForm.appendChild(tempError);
             
-            appElement.innerHTML = `
-                <div class="recent-app-info">
-                    <h4>${app.reference}</h4>
-                    <p>${app.personalInfo.firstName} ${app.personalInfo.lastName} • ${getVisaTypeLabel(app.visaInfo.type)}</p>
-                </div>
-                <div class="recent-app-status">
-                    <span class="status-badge ${app.status}">${getStatusLabel(app.status)}</span>
-                </div>
-            `;
-            
-            recentAppsList.appendChild(appElement);
-        });
-        
-        recentApplications.style.display = 'block';
+            // Remove after 8 seconds
+            setTimeout(() => {
+                if (tempError.parentNode) {
+                    tempError.remove();
+                }
+            }, 8000);
+        }
     }
     
     function downloadVisa() {
-        // Simulate visa download
         const reference = document.getElementById('displayReference').textContent;
+        const applicantName = document.getElementById('applicantName').textContent;
+        const visaType = document.getElementById('visaType').textContent;
         
-        // Create a simple visa document (in real implementation, this would be a PDF)
+        // Create visa document content
         const visaContent = `
-            UAE VISA APPROVAL
-            
-            Reference: ${reference}
-            Applicant: ${document.getElementById('applicantName').textContent}
-            Visa Type: ${document.getElementById('visaType').textContent}
-            Nationality: ${document.getElementById('nationality').textContent}
-            
-            Status: APPROVED
-            
-            This document serves as your UAE visa approval.
-            Please present this along with your passport at immigration.
-            
-            Valid from: ${new Date().toLocaleDateString()}
-            
-            EasyUAEVisa - Official UAE Visa Portal
+═══════════════════════════════════════════
+        UAE VISA APPROVAL
+═══════════════════════════════════════════
+
+Reference Number: ${reference}
+Applicant Name: ${applicantName}
+Visa Type: ${visaType}
+
+Status: APPROVED ✓
+
+Issue Date: ${new Date().toLocaleDateString()}
+
+This document serves as your UAE visa approval.
+Please present this along with your passport 
+at UAE immigration.
+
+───────────────────────────────────────────
+UAE VISA - Official UAE Visa Portal
+Support: support@easyuaevisa.com
+═══════════════════════════════════════════
         `;
         
         // Create and download file
@@ -457,12 +356,10 @@ document.addEventListener('DOMContentLoaded', function() {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
         
-        // Show notification
         showNotification('Visa document downloaded successfully!', 'success');
     }
     
     function showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
@@ -470,12 +367,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <span>${message}</span>
         `;
         
-        // Style the notification
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? 'var(--success-color)' : 'var(--info-color)'};
+            background: ${type === 'success' ? '#00732e' : '#0066cc'};
             color: white;
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -490,7 +386,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(notification);
         
-        // Remove notification after 4 seconds
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease-out';
             setTimeout(() => {
@@ -500,4 +395,77 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }, 4000);
     }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (stopTracking) {
+            stopTracking();
+        }
+    });
 });
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-open {
+        background: #F59E0B;
+        color: white;
+    }
+    
+    .status-captured {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .status-submitted {
+        background: #3B82F6;
+        color: white;
+    }
+    
+    .status-processing {
+        background: #8B5CF6;
+        color: white;
+    }
+    
+    .status-approved {
+        background: #10B981;
+        color: white;
+    }
+    
+    .status-declined {
+        background: #EF4444;
+        color: white;
+    }
+`;
+document.head.appendChild(style);
