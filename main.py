@@ -24,6 +24,11 @@ def serve_status():
     response = make_response(send_file('status.html'))
     return add_no_cache_headers(response)
 
+@app.route('/payment.html')
+def serve_payment():
+    response = make_response(send_file('payment.html'))
+    return add_no_cache_headers(response)
+
 @app.route('/<path:filename>')
 def serve_static(filename):
     response = make_response(send_from_directory('.', filename))
