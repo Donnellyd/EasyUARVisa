@@ -106,3 +106,29 @@ To ensure the application remains functional even when the backend is unavailabl
 - **Status Tracking**: Works with both backend data and locally saved applications
 - **Auto-Notification**: Users are informed when using local storage vs. backend connection
 - **No Errors**: Instead of showing "Failed to fetch" errors, the app gracefully handles connection issues
+
+## Payment Integration (October 23, 2025)
+
+The application now includes integrated payment processing after visa application submission:
+
+### Payment Flow
+1. **Application Submission**: User completes visa application form
+2. **Success Confirmation**: Modal displays application reference number
+3. **Auto-Redirect**: After 3 seconds, automatically redirects to payment page
+4. **Payment Details**: Pre-filled with applicant info (name, email, amount, reference)
+5. **Country Selection**: User selects their country for payment processing
+6. **Secure Gateway**: Redirects to DubaiVisaAI payment gateway
+7. **Payment Completion**: User completes payment through secure external gateway
+
+### Payment Features
+- **Seamless Integration**: Payment page matches UAE color theme and design
+- **Pre-filled Data**: Name, email, amount, and reference auto-populated from application
+- **Backend API**: Connects to `https://workspace.duane16.repl.co/api/payments/start`
+- **Secure Redirect**: Uses official payment gateway links from backend
+- **Country Support**: Dropdown for African countries and international options
+- **Error Handling**: Clear error messages if payment initiation fails
+
+### Technical Implementation
+- **payment.html**: Professional payment page with UAE styling
+- **payment-script.js**: Handles payment API calls and gateway redirects
+- **Updated Pricing**: Multiple Entry 60 Days now AED 1,980
