@@ -167,3 +167,46 @@ To ensure users can always complete their visa application journey, even when th
 - **User Control**: Users decide when to retry payment
 - **Seamless Recovery**: One click to resume payment process
 - **Professional Experience**: No technical errors or confusion
+
+### Enhanced Payment Debugging (October 23, 2025)
+
+Added comprehensive debugging and retry features to make payment troubleshooting easier for developers and smoother for users:
+
+#### Advanced Error Logging
+- **logPaymentError() Function**: Structured console logging with console.group formatting
+  - Displays error message, name, stack trace, error type, and backend URL
+  - Makes debugging payment issues fast and clear
+- **Stage-by-Stage Tracking**: Emoji-based console logging for each payment step
+  - 🔄 Initiating payment...
+  - 📡 Calling backend at: [URL]
+  - ✅ Backend response received (success)
+  - ⚠️ Backend unreachable — likely sleeping (error)
+  - 💤 Suggesting wake-up link to user
+  - 🔁 Retrying payment after backend wake
+
+#### Smart Countdown Timer
+- **60-Second Wake-Up Timer**: When user clicks "Wake up backend" link
+  - Automatically starts countdown showing remaining seconds
+  - Displays helpful message: "Backend is waking up... X seconds remaining"
+  - Retry button disabled during countdown to prevent premature retries
+  - Success message shown when countdown completes: "Backend should be ready! You can now retry payment"
+  - Prevents users from retrying too soon before backend is fully awake
+
+#### Success Modal
+- **Animated Success Modal**: Displays when payment successfully initiates
+  - Green checkmark icon with smooth animations
+  - Clear success message: "Payment initiated successfully!"
+  - Auto-redirect to payment gateway after 2 seconds
+  - Professional design matching UAE color theme
+
+#### Enhanced User Experience
+- **Loading States**: Payment button shows spinner and "Processing Payment..." during submission
+- **Detailed Error Messages**: Distinguishes between backend sleeping, network errors, and other failures
+- **Step-by-Step Instructions**: Clear numbered list on how to wake backend and retry
+- **Visual Feedback**: Countdown display with red text matching UAE colors
+
+#### Technical Implementation
+- **payment-script.js**: Enhanced with all debugging and retry logic
+- **styles.css**: Added payment modal CSS with animations (fadeIn, slideUp, checkmark)
+- **Console Logging**: Professional error tracking for developers
+- **Responsive Design**: Modal and countdown work on all screen sizes
