@@ -65,7 +65,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Payment error:', error);
-            showError('Payment initiation failed: ' + error.message);
+            
+            // Save payment intent to localStorage for later retry
+            savePaymentIntent({
+                applicationId,
+                applicantName,
+                applicantEmail,
+                amount: parseFloat(amount),
+                country
+            });
+            
+            // Show fallback UI instead of error message
+            showFallbackOptions();
             
             // Re-enable button
             paymentBtn.disabled = false;
@@ -124,4 +135,65 @@ document.addEventListener('DOMContentLoaded', function() {
         if (errorDiv) errorDiv.style.display = 'none';
         if (successDiv) successDiv.style.display = 'none';
     }
+    
+    function savePaymentIntent(paymentData) {
+        // Save payment intent to localStorage
+        const pendingPayment = {
+            ...paymentData,
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+        };
+        
+        localStorage.setItem('pendingPayment_' + paymentData.applicationId, JSON.stringify(pendingPayment));
+    }
+    
+    function showFallbackOptions() {
+        // Hide the main form
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.style.display = 'none';
+        }
+        
+        // Show the fallback UI
+        const fallbackUI = document.getElementById('fallbackUI');
+        if (fallbackUI) {
+            fallbackUI.style.display = 'block';
+        }
+    }
+    
+    // Handle "Try Payment Again" button
+    window.retryPayment = function() {
+        // Hide fallback UI
+        const fallbackUI = document.getElementById('fallbackUI');
+        if (fallbackUI) {
+            fallbackUI.style.display = 'none';
+        }
+        
+        // Show form again
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.style.display = 'block';
+        }
+        
+        // Reload the page to reset
+        location.reload();
+    };
+    
+    // Handle "Continue Without Payment" button
+    window.continueWithoutPayment = function() {
+        const applicationId = document.getElementById('applicationId').value;
+        const applicantEmail = document.getElementById('applicantEmail').value;
+        
+        // Show confirmation message
+        const fallbackMessage = document.getElementById('fallbackMessage');
+        if (fallbackMessage) {
+            fallbackMessage.innerHTML = '<i class="fas fa-check-circle"></i> Payment details saved! Redirecting to status tracking...';
+            fallbackMessage.className = 'fallback-message success';
+        }
+        
+        // Redirect to status page after 2 seconds
+        setTimeout(() => {
+            window.location.href = `status.html`;
+        }, 2000);
+    };
 });
