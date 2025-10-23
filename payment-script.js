@@ -64,7 +64,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
         } catch (error) {
-            console.error('Payment error:', error);
+            // Log detailed error information
+            console.error('Payment error details:', {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+                type: error.constructor.name
+            });
+            
+            // Determine error type and create helpful message
+            let errorDetails = '';
+            if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                errorDetails = 'Cannot connect to payment backend at workspace.duane16.repl.co. The server may be sleeping or offline.';
+            } else if (error.message.includes('NetworkError')) {
+                errorDetails = 'Network connection failed. Please check your internet connection.';
+            } else {
+                errorDetails = error.message;
+            }
+            
+            console.log('Backend URL:', 'https://workspace.duane16.repl.co/api/payments/start');
+            console.log('Error details:', errorDetails);
             
             // Save payment intent to localStorage for later retry
             savePaymentIntent({
@@ -75,8 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 country
             });
             
-            // Show fallback UI instead of error message
-            showFallbackOptions();
+            // Show fallback UI with detailed error
+            showFallbackOptions(errorDetails);
             
             // Re-enable button
             paymentBtn.disabled = false;
@@ -147,11 +166,25 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('pendingPayment_' + paymentData.applicationId, JSON.stringify(pendingPayment));
     }
     
-    function showFallbackOptions() {
+    function showFallbackOptions(errorDetails) {
         // Hide the main form
         const paymentForm = document.getElementById('paymentForm');
         if (paymentForm) {
             paymentForm.style.display = 'none';
+        }
+        
+        // Update fallback message with specific error details
+        const fallbackMessage = document.getElementById('fallbackMessage');
+        if (fallbackMessage && errorDetails) {
+            const messageHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Payment System Temporarily Unavailable</h4>
+                <p>${errorDetails}</p>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    <strong>Tip:</strong> Visit <a href="https://workspace.duane16.repl.co" target="_blank" style="color: #c8102e;">workspace.duane16.repl.co</a> to wake up the backend, then click "Try Payment Again".
+                </p>
+            `;
+            fallbackMessage.innerHTML = messageHTML;
         }
         
         // Show the fallback UI
