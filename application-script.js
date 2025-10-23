@@ -330,6 +330,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuccessModal(reference, totalFee) {
         console.log('Showing modal with reference:', reference, 'fee:', totalFee);
         
+        // Get applicant details for payment page
+        const applicantName = `${document.getElementById('firstName')?.value || ''} ${document.getElementById('lastName')?.value || ''}`.trim();
+        const applicantEmail = document.getElementById('email')?.value || '';
+        
         // Update modal content
         document.getElementById('applicationRef').textContent = reference;
         
@@ -344,10 +348,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const successModal = new bootstrap.Modal(modalElement);
             successModal.show();
             console.log('Modal displayed');
+            
+            // Redirect to payment page after 3 seconds
+            setTimeout(() => {
+                redirectToPayment(reference, applicantName, applicantEmail, totalFee);
+            }, 3000);
         } else {
             console.error('Bootstrap or modal element not found');
-            alert(`Application submitted successfully!\n\nReference: ${reference}\nTotal Fee: AED ${totalFee.toFixed(2)}\n\nYou can track your application using the reference number.`);
+            // Redirect immediately if modal doesn't work
+            redirectToPayment(reference, applicantName, applicantEmail, totalFee);
         }
+    }
+    
+    function redirectToPayment(reference, name, email, amount) {
+        const paymentUrl = `payment.html?ref=${encodeURIComponent(reference)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${encodeURIComponent(amount)}`;
+        console.log('Redirecting to payment:', paymentUrl);
+        window.location.href = paymentUrl;
     }
     
     function saveProgress() {
