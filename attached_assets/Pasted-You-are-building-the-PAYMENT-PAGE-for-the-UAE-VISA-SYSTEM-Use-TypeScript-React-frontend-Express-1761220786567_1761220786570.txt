@@ -1,0 +1,86 @@
+You are building the PAYMENT PAGE for the UAE VISA SYSTEM.
+Use TypeScript (React frontend + Express backend). 
+Your goal is to make payment handling 100% user-friendly and self-recovering when the backend is asleep or offline.
+
+🎯 OBJECTIVE
+Implement full payment connection logic, detailed error handling, and retry capability.
+
+---
+
+✅ FRONTEND (React + TypeScript)
+
+Create a `PaymentPage.tsx` component with these features:
+
+1. **Payment Gateway Call**
+   - Use `fetch('https://workspace.duane16.repl.co/api/payment/start', { method: 'POST', body: JSON.stringify({ amount, reference, user }) })`.
+   - Add a loading spinner while the request is pending.
+
+2. **Error Logging**
+   - On error, log full details to console:
+     ```
+     console.error('PAYMENT ERROR:', {
+       message: error.message,
+       name: error.name,
+       stack: error.stack,
+       type: error.constructor.name,
+       backendURL: 'https://workspace.duane16.repl.co/api/payment/start'
+     });
+     ```
+
+3. **UI Error Display**
+   - When the backend cannot connect, show a friendly UI message:
+     ```
+     ❌ Cannot connect to payment backend at workspace.duane16.repl.co.
+     The server may be sleeping or offline.
+     ```
+   - Include:
+     - A **clickable link** to open `https://workspace.duane16.repl.co` in a new tab.
+       Text: “Wake up backend”
+     - A **“Try Payment Again”** button that retries the fetch call after 60 seconds.
+
+4. **Retry Logic**
+   - Implement a small timer or state that waits 60s after clicking “Wake up backend,” then allows retry.
+   - On retry success, show toast or modal: “✅ Payment processed successfully!”
+
+5. **Enhanced Console Tracking**
+   - Log all stages:
+     ```
+     console.info('🔄 Initiating payment...');
+     console.info('📡 Calling backend at:', backendURL);
+     console.info('✅ Backend response received');
+     console.warn('⚠️ Backend unreachable — likely sleeping');
+     console.info('💤 Suggesting wake-up link to user');
+     console.info('🔁 Retrying payment after backend wake');
+     ```
+
+---
+
+✅ BACKEND (Express + TypeScript)
+
+Add this route to `server.ts` or `index.ts`:
+```ts
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.post('/api/payment/start', async (req, res) => {
+  console.log('💳 Payment request received:', req.body);
+  try {
+    // Simulate calling external gateway (Flutterwave or Ozow)
+    // Example: await initiatePayment(req.body);
+    return res.status(200).json({ status: 'success', message: 'Payment initiated' });
+  } catch (error: any) {
+    console.error('❌ Payment backend error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message || 'Failed to connect to payment gateway',
+      stack: error.stack,
+      name: error.name
+    });
+  }
+});
+
+app.listen(3000, () => console.log('🚀 Backend running on port 3000'));
