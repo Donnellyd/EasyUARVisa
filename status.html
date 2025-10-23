@@ -148,6 +148,22 @@
                         </div>
                     </div>
 
+                    <!-- Pending Payment Alert -->
+                    <div id="pendingPaymentAlert" class="pending-payment-alert" style="display: none;">
+                        <div class="payment-alert-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="payment-alert-content">
+                            <h5>Payment Pending</h5>
+                            <p>Your application has been saved, but payment is still required to process your visa.</p>
+                            <p class="payment-amount">Amount Due: <span id="pendingAmount">AED 0.00</span></p>
+                        </div>
+                        <button type="button" class="btn btn-complete-payment" id="completePaymentBtn">
+                            <i class="fas fa-credit-card"></i>
+                            Complete Payment Now
+                        </button>
+                    </div>
+
                     <!-- Action Buttons -->
                     <div class="status-actions">
                         <button type="button" class="btn btn-primary" id="downloadVisa" style="display: none;">

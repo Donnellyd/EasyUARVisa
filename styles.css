@@ -1502,6 +1502,77 @@ body {
     margin-right: 0.5rem;
 }
 
+/* Pending Payment Alert on Status Page */
+.pending-payment-alert {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-left: 4px solid #ffc107;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.payment-alert-icon {
+    font-size: 2.5rem;
+    color: #ffc107;
+    flex-shrink: 0;
+}
+
+.payment-alert-content {
+    flex-grow: 1;
+}
+
+.payment-alert-content h5 {
+    color: #333333;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.payment-alert-content p {
+    color: #666666;
+    margin-bottom: 0.25rem;
+}
+
+.payment-amount {
+    font-weight: 600;
+    color: #c8102e;
+    font-size: 1.1rem;
+}
+
+.btn-complete-payment {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #c8102e 0%, #a00d23 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-complete-payment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(200, 16, 46, 0.3);
+}
+
+@media (max-width: 768px) {
+    .pending-payment-alert {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .btn-complete-payment {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 768px) {
     .payment-header h1 {
         font-size: 2rem;

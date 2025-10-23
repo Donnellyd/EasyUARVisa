@@ -145,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Displaying application:', application);
         }
         
+        // Check for pending payment
+        checkPendingPayment(application.applicationNumber || application.applicationId);
+        
         // Populate basic information
         document.getElementById('displayReference').textContent = application.applicationNumber || 'N/A';
         
@@ -458,6 +461,64 @@ Support: support@easyuaevisa.com
             return [];
         }
     }
+    
+    function checkPendingPayment(applicationId) {
+        if (!applicationId) return;
+        
+        // Check if there's a pending payment for this application
+        const pendingPaymentKey = 'pendingPayment_' + applicationId;
+        const pendingPaymentData = localStorage.getItem(pendingPaymentKey);
+        
+        if (pendingPaymentData) {
+            try {
+                const paymentInfo = JSON.parse(pendingPaymentData);
+                
+                if (paymentInfo.status === 'pending') {
+                    showPendingPaymentAlert(paymentInfo);
+                }
+            } catch (error) {
+                console.error('Error parsing pending payment:', error);
+            }
+        } else {
+            // Hide pending payment alert if no payment is pending
+            const alert = document.getElementById('pendingPaymentAlert');
+            if (alert) {
+                alert.style.display = 'none';
+            }
+        }
+    }
+    
+    function showPendingPaymentAlert(paymentInfo) {
+        const alert = document.getElementById('pendingPaymentAlert');
+        const amountSpan = document.getElementById('pendingAmount');
+        
+        if (alert && amountSpan) {
+            amountSpan.textContent = 'AED ' + parseFloat(paymentInfo.amount).toFixed(2);
+            alert.style.display = 'flex';
+            
+            // Store payment info for later use
+            window.currentPendingPayment = paymentInfo;
+        }
+    }
+    
+    // Handle "Complete Payment Now" button
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#completePaymentBtn')) {
+            const paymentInfo = window.currentPendingPayment;
+            
+            if (paymentInfo) {
+                // Redirect to payment page with pre-filled data
+                const params = new URLSearchParams({
+                    ref: paymentInfo.applicationId,
+                    name: paymentInfo.applicantName,
+                    email: paymentInfo.applicantEmail,
+                    amount: paymentInfo.amount
+                });
+                
+                window.location.href = 'payment.html?' + params.toString();
+            }
+        }
+    });
     
     // Cleanup on page unload
     window.addEventListener('beforeunload', () => {
