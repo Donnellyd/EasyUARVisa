@@ -132,3 +132,38 @@ The application now includes integrated payment processing after visa applicatio
 - **payment.html**: Professional payment page with UAE styling
 - **payment-script.js**: Handles payment API calls and gateway redirects
 - **Updated Pricing**: Multiple Entry 60 Days now AED 1,980
+
+### Payment Fallback System (October 23, 2025)
+
+To ensure users can always complete their visa application journey, even when the payment gateway is temporarily unavailable:
+
+#### Smart Fallback on Payment Page
+- **Automatic Detection**: Detects when payment backend is unreachable
+- **Save Payment Intent**: Stores payment details (reference, amount, name, email, country) in localStorage
+- **User-Friendly Options**: 
+  - "Try Payment Again" - Reload and retry payment connection
+  - "Continue Without Payment" - Save details and proceed to status tracking
+- **Friendly Messages**: Shows clear, non-technical explanations instead of error codes
+- **No Dead Ends**: Users always have a path forward, never stuck on error
+
+#### Status Page Payment Recovery
+- **Pending Payment Alert**: Automatically displays warning banner when payment is incomplete
+- **Payment Details**: Shows amount due in red (UAE color theme)
+- **Complete Payment Button**: One-click redirect back to payment page with pre-filled information
+- **Smart Detection**: Checks localStorage for pending payments when viewing application status
+
+#### User Flow with Fallback
+1. User submits visa application
+2. Redirected to payment page
+3. If backend down: Friendly message appears with two options
+4. User clicks "Continue Without Payment"
+5. Confirmation message shown, redirects to status page
+6. Status page shows "Payment Pending" alert
+7. User can click "Complete Payment Now" anytime
+8. Returns to payment page with all details pre-filled
+
+#### Benefits
+- **Zero Data Loss**: All payment information preserved locally
+- **User Control**: Users decide when to retry payment
+- **Seamless Recovery**: One click to resume payment process
+- **Professional Experience**: No technical errors or confusion
