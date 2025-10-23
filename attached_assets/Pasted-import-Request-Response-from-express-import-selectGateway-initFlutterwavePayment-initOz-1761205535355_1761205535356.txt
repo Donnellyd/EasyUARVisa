@@ -1,0 +1,64 @@
+import { Request, Response } from "express";
+import { selectGateway, initFlutterwavePayment, initOzowPayment } from "./paymentService";
+import { Pool } from "pg";
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+// Start payment
+export async function startPayment(req: Request, res: Response) {
+  try {
+    const { amount, currency = "ZAR", country, email, name, description } = req.body;
+    const reference = `STRIDE-${Date.now()}`;
+    const gateway = selectGateway(country);
+
+    let paymentLink: string;
+    if (gateway === "ozow") {
+      paymentLink = await initOzowPayment({ amount, currency, country, email, name, reference, description });
+    } else {
+      paymentLink = await initFlutterwavePayment({ amount, currency, country, email, name, reference, description });
+    }
+
+    // Log to DB (optional)
+    await pool.query(
+      `INSERT INTO payments(reference, gateway, amount, country, email, status)
+       VALUES($1,$2,$3,$4,$5,$6)`,
+      [reference, gateway, amount, country, email, "pending"]
+    );
+
+    res.json({ paymentLink, gateway, reference });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to start payment", detail: err.message });
+  }
+}
+
+// Verify callback from gateway
+export async function verifyPayment(req: Request, res: Response) {
+  const url = req.originalUrl;
+  const isFlutterwave = url.includes("flutterwave");
+  const isOzow = url.includes("ozow");
+
+  try {
+    if (isFlutterwave) {
+      const { tx_ref, status } = req.query;
+      if (status === "successful") {
+        await pool.query(`UPDATE payments SET status='paid' WHERE reference=$1`, [tx_ref]);
+        return res.send(`<h2>✅ Payment successful (Flutterwave)</h2>`);
+      }
+      return res.send(`<h2>❌ Payment failed (Flutterwave)</h2>`);
+    }
+
+    if (isOzow) {
+      const { transactionReference, status } = req.query;
+      if (status?.toString().toLowerCase() === "completed") {
+        await pool.query(`UPDATE payments SET status='paid' WHERE reference=$1`, [transactionReference]);
+        return res.send(`<h2>✅ Payment successful (Ozow)</h2>`);
+      }
+      return res.send(`<h2>❌ Payment failed (Ozow)</h2>`);
+    }
+
+    res.status(400).send("Unknown verification source");
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send("Verification error");
+  }
+}

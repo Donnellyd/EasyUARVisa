@@ -1,0 +1,89 @@
+import axios from "axios";
+import crypto from "crypto";
+
+interface PaymentPayload {
+  amount: number;
+  currency: string;
+  country: string;
+  email: string;
+  name: string;
+  reference: string;
+  description?: string;
+}
+
+// Utility: Decide which gateway to use
+export function selectGateway(country: string) {
+  const lower = country.toLowerCase();
+  const saCountries = ["south africa", "za"];
+  if (saCountries.includes(lower)) return "ozow";
+  return "flutterwave";
+}
+
+/* ------------------------------------------------------------
+ * FLUTTERWAVE LOGIC
+ * ---------------------------------------------------------- */
+export async function initFlutterwavePayment(payload: PaymentPayload) {
+  const headers = {
+    Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  const res = await axios.post(
+    "https://api.flutterwave.com/v3/payments",
+    {
+      tx_ref: payload.reference,
+      amount: payload.amount,
+      currency: payload.currency || "ZAR",
+      redirect_url: `${process.env.APP_BASE_URL}/api/payments/verify/flutterwave`,
+      customer: {
+        email: payload.email,
+        name: payload.name,
+      },
+      payment_options: "card,banktransfer,mobilemoney",
+      meta: {
+        country: payload.country,
+      },
+      customizations: {
+        title: "Stride Payments",
+        description: payload.description || "Stride Zone Portal Payment",
+      },
+    },
+    { headers }
+  );
+
+  return res.data.data.link; // Redirect URL
+}
+
+/* ------------------------------------------------------------
+ * OZOW LOGIC
+ * ---------------------------------------------------------- */
+export async function initOzowPayment(payload: PaymentPayload) {
+  const siteCode = process.env.OZOW_SITE_CODE!;
+  const apiKey = process.env.OZOW_API_KEY!;
+  const privateKey = process.env.OZOW_PRIVATE_KEY!;
+  const baseUrl = "https://test.ozow.com"; // or live url later
+  const successUrl = `${process.env.APP_BASE_URL}/api/payments/verify/ozow`;
+  const amount = payload.amount.toFixed(2);
+
+  // Ozow requires a signature hash
+  const hashString = `${siteCode}${payload.reference}${amount}${payload.currency}${successUrl}${privateKey}`;
+  const hash = crypto.createHash("sha512").update(hashString).digest("hex").toUpperCase();
+
+  const ozowPayload = {
+    siteCode,
+    countryCode: "ZA",
+    currencyCode: "ZAR",
+    amount,
+    transactionReference: payload.reference,
+    bankReference: payload.reference,
+    cancelUrl: successUrl,
+    successUrl,
+    notifyUrl: successUrl,
+    isTest: process.env.OZOW_MODE === "sandbox",
+    hashCheck: hash,
+  };
+
+  // Generate payment link
+  const redirectUrl = `${baseUrl}/OzowPaymentEngine?${new URLSearchParams(ozowPayload as any).toString()}`;
+  return redirectUrl;
+}
