@@ -105,6 +105,34 @@
                                 <div id="paymentError" class="alert alert-danger" style="display: none; margin-top: 1rem;"></div>
                                 <div id="paymentSuccess" class="alert alert-success" style="display: none; margin-top: 1rem;"></div>
                             </form>
+
+                            <!-- Fallback UI (hidden by default) -->
+                            <div id="fallbackUI" style="display: none;">
+                                <div id="fallbackMessage" class="fallback-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h4>Payment System Temporarily Unavailable</h4>
+                                    <p>We're experiencing connectivity issues with our payment gateway. Your application details have been saved securely.</p>
+                                </div>
+
+                                <div class="fallback-options">
+                                    <h5>What would you like to do?</h5>
+                                    
+                                    <button type="button" class="btn btn-retry" onclick="retryPayment()">
+                                        <i class="fas fa-sync-alt"></i>
+                                        Try Payment Again
+                                    </button>
+                                    
+                                    <button type="button" class="btn btn-continue" onclick="continueWithoutPayment()">
+                                        <i class="fas fa-arrow-right"></i>
+                                        Continue Without Payment
+                                    </button>
+                                    
+                                    <p class="fallback-note">
+                                        <i class="fas fa-info-circle"></i>
+                                        You can complete your payment anytime from the status tracking page.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

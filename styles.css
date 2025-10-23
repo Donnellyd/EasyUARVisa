@@ -1405,6 +1405,103 @@ body {
     font-size: 1.2rem;
 }
 
+/* Payment Fallback UI */
+.fallback-message {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-left: 4px solid #ffc107;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.fallback-message.success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-left: 4px solid var(--uae-green);
+}
+
+.fallback-message i {
+    font-size: 3rem;
+    color: #ffc107;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.fallback-message.success i {
+    color: var(--uae-green);
+}
+
+.fallback-message h4 {
+    color: #333333;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.fallback-message p {
+    color: #666666;
+    margin: 0;
+}
+
+.fallback-options {
+    text-align: center;
+}
+
+.fallback-options h5 {
+    color: #333333;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.btn-retry, .btn-continue {
+    width: 100%;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.btn-retry {
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: white;
+}
+
+.btn-retry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-continue {
+    background: linear-gradient(135deg, var(--uae-green) 0%, #007a2e 100%);
+    color: white;
+}
+
+.btn-continue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 153, 57, 0.3);
+}
+
+.fallback-note {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #666666;
+    font-size: 0.95rem;
+}
+
+.fallback-note i {
+    color: var(--uae-green);
+    margin-right: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .payment-header h1 {
         font-size: 2rem;
