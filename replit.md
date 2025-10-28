@@ -1,6 +1,6 @@
 # Overview
 
-UAE VISA is a Flask-based web application serving as the official UAE visa application portal. The application provides a complete user interface for visa applications, status tracking, and information display with a beautiful, professional design featuring UAE national colors.
+UAE VISA is a Flask-based web application serving as the official UAE visa application portal. It provides a comprehensive platform for visa applications, status tracking, and information display, designed with a professional aesthetic incorporating UAE national colors. The project aims to offer a seamless and secure visa application experience, leveraging a Node.js backend for robust payment processing via PayFast.
 
 # User Preferences
 
@@ -9,204 +9,72 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-The application follows a traditional multi-page web architecture with separate HTML files for different functionalities:
-
-- **Static HTML Structure**: Three main pages (index.html, application.html, status.html) providing home, application form, and status tracking functionality
-- **Client-Side JavaScript**: Separate JavaScript files handle form validation, data persistence using localStorage, and interactive features
-- **CSS Styling**: Custom CSS with CSS variables for consistent theming using UAE national colors and modern design patterns
-- **Responsive Design**: Bootstrap 5.1.3 integration for responsive layout with custom styling overlays
+The application uses a multi-page web architecture with dedicated HTML, CSS, and JavaScript files for various functionalities. It integrates Bootstrap 5.1.3 for responsive design and custom CSS for consistent theming based on UAE national colors. Client-side JavaScript handles form validation, data persistence via localStorage, and interactive elements.
 
 ## Data Management
-- **Local Storage**: Client-side data persistence for form progress saving and recent applications tracking
-- **Demo Data**: Hardcoded sample data in JavaScript for status tracking demonstration
-- **Form Validation**: Client-side validation with custom rules and error messaging system
+Client-side data persistence for form progress and recent applications is managed using localStorage. Demo data is hardcoded for status tracking demonstrations, and comprehensive client-side form validation is implemented.
 
 ## User Interface Design
-- **UAE Color Theme**: Design system exclusively using UAE national colors (red, green, white, black, grey) - NO BLUE
-- **Black Header**: Professional black navigation header with UAE flag icon
-- **Red Accent Pricing**: All visa prices displayed in red (#c8102e) for emphasis
-- **Dark Grey Headings**: Main headings and text in dark grey (#333333) for readability
-- **Black Buttons & Icons**: All call-to-action buttons and service icons use black gradient
-- **Clean Hero Section**: Full Sheikh Zayed Grand Mosque background without card overlay
-- **Progressive Enhancement**: Base functionality works without JavaScript, enhanced with interactive features
-- **Accessibility**: Semantic HTML structure with proper form labels and ARIA attributes
+The design adheres strictly to a UAE national color palette (red, green, white, black, grey), avoiding blue. Key design elements include a black navigation header, red accents for pricing, dark grey headings, and black buttons and icons. The hero section features a clean Sheikh Zayed Grand Mosque background. The UI is built with progressive enhancement and accessibility in mind.
 
 ## File Organization
-- **Separation of Concerns**: HTML structure, CSS styling, and JavaScript functionality are properly separated
-- **Modular JavaScript**: Different scripts for application logic (script.js) and status tracking (status-script.js)
-- **Asset Management**: External fonts (Google Fonts) and icons (Font Awesome) loaded via CDN
+The project maintains a clear separation of concerns with HTML, CSS, and JavaScript files organized into distinct modules. Asset management utilizes CDNs for external fonts (Google Fonts) and icons (Font Awesome).
+
+## Backend Integration
+The application integrates with a backend portal for application submission, status tracking, and document uploads. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality.
+
+## Payment Integration
+Payment processing is a core feature, integrated through PayFast. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
+
+## PayFast Payment Gateway Architecture
+A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to PayFast payment processing. A PostgreSQL database tracks payment statuses, and security features include MD5 signature verification. The system supports both sandbox and live modes, controlled by environment variables.
+
+### Database Schema
+```sql
+CREATE TABLE payments (
+    id SERIAL PRIMARY KEY,
+    reference VARCHAR(255) UNIQUE,
+    application_id VARCHAR(255),
+    amount DECIMAL(10, 2),
+    currency VARCHAR(10) DEFAULT 'ZAR',
+    email VARCHAR(255),
+    name VARCHAR(255),
+    country VARCHAR(100),
+    status VARCHAR(50) DEFAULT 'pending',
+    payment_id VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
 
 # External Dependencies
 
 ## CDN Resources
-- **Google Fonts**: Inter font family for typography
-- **Font Awesome 6.0.0**: Icon library for UI elements
-- **Bootstrap 5.1.3**: CSS framework for responsive grid and components
+- **Google Fonts**: Inter font family
+- **Font Awesome 6.0.0**: Icon library
+- **Bootstrap 5.1.3**: CSS framework
 
 ## Browser APIs
-- **Local Storage API**: For client-side data persistence
-- **DOM API**: For dynamic content manipulation and form handling
-- **Form Validation API**: For input validation and error handling
+- **Local Storage API**: Client-side data persistence
+- **DOM API**: Dynamic content manipulation
+- **Form Validation API**: Input validation
 
 ## Development Tools
-- **Replit Environment**: Hosted development environment with automatic deployment
-- **Flask Backend**: Python-based web framework serving the application
-- **Gunicorn**: Production-ready WSGI server
+- **Replit Environment**: Hosted development
+- **Flask Backend**: Python web framework
+- **Gunicorn**: WSGI server
 
-## Recent Changes (October 21, 2025)
+## Payment Gateway
+- **PayFast**: Primary payment processor.
+  - Merchant ID, Merchant Key, Passphrase stored in Replit Secrets.
+  - Sandbox and Live modes configurable via `PAYFAST_SANDBOX` environment variable.
 
-### Design Updates
-- Removed Tourist Visa card from hero section for cleaner design
-- Eliminated all blue colors from the application - pure UAE color scheme
-- Changed all main headings to dark grey (#333333)
-- Buttons and icons changed from red back to black for professional look
-- Visa prices remain in red for visual emphasis
-- Clean, unobstructed Sheikh Zayed Grand Mosque hero background
+## Backend Services
+- **Node.js Express**: Dedicated backend for PayFast integration.
+- **PostgreSQL**: Database for payment tracking.
 
-### Form Improvements
-- Removed Marital Status field from application form
-- Removed Nationality field from application form
-- Renamed "Passport Copy" upload to "Photo of Applicant"
-- Added new document upload fields: "Airline Confirmation" and "Hotel Booking"
-- Added light green success indicator when documents are uploaded
-- Removed days/time estimates from processing options (now shows "Standard", "Express", "Urgent")
-
-## Backend Integration
-
-The application is now integrated with the DubaiVisaAI backend portal:
-
-### SDK Integration
-- **SDK File**: `static/visa-portal-sdk.js` - Dubai Visa Portal SDK for backend communication
-- **API Base URL**: `https://workspace.duane16.repl.co`
-- **Features**: Real-time application submission, status tracking, document uploads, payment processing
-
-### Application Submission
-- Form submissions now go directly to the DubaiVisaAI backend via SDK
-- Generates real application numbers from the backend
-- Automatic document upload after successful submission
-- Supports 4 document types: passport photo, passport copy, airline confirmation, hotel booking
-
-### Status Tracking
-- Real-time status checking using email and passport number
-- Auto-refresh every 30 seconds for live updates
-- Maps backend status to visual timeline
-- Status types: open, captured, submitted, processing, approved, declined
-
-### Data Flow
-1. **Form Submission**: User fills application → SDK sends to backend → Returns application number
-2. **Document Upload**: Files stored locally → Uploaded to backend via SDK after submission
-3. **Status Check**: User enters email + passport → SDK queries backend → Displays real-time status
-4. **Auto-Refresh**: Status page automatically checks for updates every 30 seconds
-
-### Fallback System (October 21, 2025)
-To ensure the application remains functional even when the backend is unavailable:
-- **Smart Fallback**: Application tries backend first, automatically falls back to localStorage if connection fails
-- **Seamless Experience**: Users can submit applications and track status regardless of backend availability
-- **Local Reference Numbers**: When backend is down, generates local reference numbers (UAE-YYYYMMDD-XXXX)
-- **Status Tracking**: Works with both backend data and locally saved applications
-- **Auto-Notification**: Users are informed when using local storage vs. backend connection
-- **No Errors**: Instead of showing "Failed to fetch" errors, the app gracefully handles connection issues
-
-## Payment Integration (October 23, 2025)
-
-The application now includes integrated payment processing after visa application submission:
-
-### Payment Flow
-1. **Application Submission**: User completes visa application form
-2. **Success Confirmation**: Modal displays application reference number
-3. **Auto-Redirect**: After 3 seconds, automatically redirects to payment page
-4. **Payment Details**: Pre-filled with applicant info (name, email, amount, reference)
-5. **Country Selection**: User selects their country for payment processing
-6. **Secure Gateway**: Redirects to DubaiVisaAI payment gateway
-7. **Payment Completion**: User completes payment through secure external gateway
-
-### Payment Features
-- **Seamless Integration**: Payment page matches UAE color theme and design
-- **Pre-filled Data**: Name, email, amount, and reference auto-populated from application
-- **Backend API**: Connects to `https://workspace.duane16.repl.co/api/payments/start`
-- **Secure Redirect**: Uses official payment gateway links from backend
-- **Country Support**: Dropdown for African countries and international options
-- **Error Handling**: Clear error messages if payment initiation fails
-
-### Technical Implementation
-- **payment.html**: Professional payment page with UAE styling
-- **payment-script.js**: Handles payment API calls and gateway redirects
-- **Updated Pricing**: Multiple Entry 60 Days now AED 1,980
-
-### Payment Fallback System (October 23, 2025)
-
-To ensure users can always complete their visa application journey, even when the payment gateway is temporarily unavailable:
-
-#### Smart Fallback on Payment Page
-- **Automatic Detection**: Detects when payment backend is unreachable
-- **Save Payment Intent**: Stores payment details (reference, amount, name, email, country) in localStorage
-- **User-Friendly Options**: 
-  - "Try Payment Again" - Reload and retry payment connection
-  - "Continue Without Payment" - Save details and proceed to status tracking
-- **Friendly Messages**: Shows clear, non-technical explanations instead of error codes
-- **No Dead Ends**: Users always have a path forward, never stuck on error
-
-#### Status Page Payment Recovery
-- **Pending Payment Alert**: Automatically displays warning banner when payment is incomplete
-- **Payment Details**: Shows amount due in red (UAE color theme)
-- **Complete Payment Button**: One-click redirect back to payment page with pre-filled information
-- **Smart Detection**: Checks localStorage for pending payments when viewing application status
-
-#### User Flow with Fallback
-1. User submits visa application
-2. Redirected to payment page
-3. If backend down: Friendly message appears with two options
-4. User clicks "Continue Without Payment"
-5. Confirmation message shown, redirects to status page
-6. Status page shows "Payment Pending" alert
-7. User can click "Complete Payment Now" anytime
-8. Returns to payment page with all details pre-filled
-
-#### Benefits
-- **Zero Data Loss**: All payment information preserved locally
-- **User Control**: Users decide when to retry payment
-- **Seamless Recovery**: One click to resume payment process
-- **Professional Experience**: No technical errors or confusion
-
-### Enhanced Payment Debugging (October 23, 2025)
-
-Added comprehensive debugging and retry features to make payment troubleshooting easier for developers and smoother for users:
-
-#### Advanced Error Logging
-- **logPaymentError() Function**: Structured console logging with console.group formatting
-  - Displays error message, name, stack trace, error type, and backend URL
-  - Makes debugging payment issues fast and clear
-- **Stage-by-Stage Tracking**: Emoji-based console logging for each payment step
-  - 🔄 Initiating payment...
-  - 📡 Calling backend at: [URL]
-  - ✅ Backend response received (success)
-  - ⚠️ Backend unreachable — likely sleeping (error)
-  - 💤 Suggesting wake-up link to user
-  - 🔁 Retrying payment after backend wake
-
-#### Smart Countdown Timer
-- **60-Second Wake-Up Timer**: When user clicks "Wake up backend" link
-  - Automatically starts countdown showing remaining seconds
-  - Displays helpful message: "Backend is waking up... X seconds remaining"
-  - Retry button disabled during countdown to prevent premature retries
-  - Success message shown when countdown completes: "Backend should be ready! You can now retry payment"
-  - Prevents users from retrying too soon before backend is fully awake
-
-#### Success Modal
-- **Animated Success Modal**: Displays when payment successfully initiates
-  - Green checkmark icon with smooth animations
-  - Clear success message: "Payment initiated successfully!"
-  - Auto-redirect to payment gateway after 2 seconds
-  - Professional design matching UAE color theme
-
-#### Enhanced User Experience
-- **Loading States**: Payment button shows spinner and "Processing Payment..." during submission
-- **Detailed Error Messages**: Distinguishes between backend sleeping, network errors, and other failures
-- **Step-by-Step Instructions**: Clear numbered list on how to wake backend and retry
-- **Visual Feedback**: Countdown display with red text matching UAE colors
-
-#### Technical Implementation
-- **payment-script.js**: Enhanced with all debugging and retry logic
-- **styles.css**: Added payment modal CSS with animations (fadeIn, slideUp, checkmark)
-- **Console Logging**: Professional error tracking for developers
-- **Responsive Design**: Modal and countdown work on all screen sizes
+## Environment Variables (Replit Secrets)
+- `PAYFAST_MERCHANT_ID`
+- `PAYFAST_MERCHANT_KEY`
+- `PAYFAST_PASSPHRASE`
+- `PAYFAST_SANDBOX`
