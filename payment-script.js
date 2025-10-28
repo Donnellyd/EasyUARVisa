@@ -1,4 +1,4 @@
-// Payment handling script with enhanced debugging and retry logic
+// Payment handling script with PayFast integration
 
 // Enhanced error logging function
 function logPaymentError(error, backendURL) {
@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Stage 1: Initiating payment
         logStage('init');
         
-        const backendURL = 'https://workspace.duane16.repl.co/api/payments/start';
+        // Get the current domain for backend URL
+        const currentDomain = window.location.origin;
+        const backendURL = `${currentDomain}/api/payments/start`;
         
         try {
             // Stage 2: Calling backend
@@ -95,11 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Stage 3: Success
             logStage('success');
             
+            console.log('Payment initiated:', data);
+            
             if (data.paymentLink) {
                 // Show success modal
-                showSuccessModal('Payment initiated successfully! Redirecting to secure payment gateway...');
+                const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
+                showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
                 
-                // Redirect to payment link after a short delay
+                // Redirect to PayFast after a short delay
                 setTimeout(() => {
                     window.location.href = data.paymentLink;
                 }, 2000);
@@ -117,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Determine error type and create helpful message
             let errorDetails = '';
             if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                errorDetails = 'Cannot connect to payment backend at workspace.duane16.repl.co. The server may be sleeping or offline.';
+                errorDetails = 'Cannot connect to payment backend. The server may be starting up or unavailable.';
             } else if (error.message.includes('NetworkError')) {
                 errorDetails = 'Network connection failed. Please check your internet connection.';
             } else {
@@ -253,16 +258,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <strong>How to fix:</strong>
                 </p>
                 <ol style="text-align: left; margin: 1rem auto; max-width: 500px; font-size: 0.9rem; color: #666;">
-                    <li>Click <a href="https://workspace.duane16.repl.co" target="_blank" style="color: #c8102e;" onclick="startWakeCountdown()">this link</a> to wake up the backend server</li>
-                    <li>Wait for the 60-second countdown to complete</li>
-                    <li>Click "Try Payment Again" to retry</li>
+                    <li>Wait a few seconds for the server to start</li>
+                    <li>Click "Try Payment Again" below</li>
+                    <li>If the problem persists, contact support</li>
                 </ol>
-                <div id="countdownDisplay" style="display: none; margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 8px;">
-                    <p style="margin: 0; font-size: 0.9rem; color: #333;">
-                        <i class="fas fa-clock"></i> Backend is waking up... 
-                        <span id="countdownSeconds" style="font-weight: bold; color: #c8102e;">60</span> seconds remaining
-                    </p>
-                </div>
             `;
             fallbackMessage.innerHTML = messageHTML;
         }
@@ -273,58 +272,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fallbackUI.style.display = 'block';
         }
     }
-    
-    // Start 60-second countdown
-    window.startWakeCountdown = function() {
-        const countdownDisplay = document.getElementById('countdownDisplay');
-        const countdownSeconds = document.getElementById('countdownSeconds');
-        const retryButton = document.querySelector('#fallbackUI button[onclick="retryPayment()"]');
-        
-        if (countdownDisplay) {
-            countdownDisplay.style.display = 'block';
-        }
-        
-        // Disable retry button during countdown
-        if (retryButton) {
-            retryButton.disabled = true;
-            retryButton.style.opacity = '0.5';
-            retryButton.style.cursor = 'not-allowed';
-        }
-        
-        let seconds = 60;
-        
-        // Clear any existing countdown
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
-        
-        countdownInterval = setInterval(() => {
-            seconds--;
-            if (countdownSeconds) {
-                countdownSeconds.textContent = seconds;
-            }
-            
-            if (seconds <= 0) {
-                clearInterval(countdownInterval);
-                
-                // Update countdown message
-                if (countdownDisplay) {
-                    countdownDisplay.innerHTML = `
-                        <p style="margin: 0; font-size: 0.9rem; color: #22c55e;">
-                            <i class="fas fa-check-circle"></i> Backend should be ready! You can now retry payment.
-                        </p>
-                    `;
-                }
-                
-                // Re-enable retry button
-                if (retryButton) {
-                    retryButton.disabled = false;
-                    retryButton.style.opacity = '1';
-                    retryButton.style.cursor = 'pointer';
-                }
-            }
-        }, 1000);
-    };
     
     // Handle "Try Payment Again" button
     window.retryPayment = function() {
