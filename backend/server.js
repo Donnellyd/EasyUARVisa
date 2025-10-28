@@ -63,46 +63,25 @@ const getPayFastConfig = () => {
 
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
-    // PayFast required field order for checkout payments
-    const fieldOrder = [
-        'merchant_id',
-        'merchant_key',
-        'return_url',
-        'cancel_url',
-        'notify_url',
-        'name_first',
-        'name_last',
-        'email_address',
-        'cell_number',
-        'm_payment_id',
-        'amount',
-        'item_name',
-        'item_description',
-        'custom_int1',
-        'custom_int2',
-        'custom_int3',
-        'custom_int4',
-        'custom_int5',
-        'custom_str1',
-        'custom_str2',
-        'custom_str3',
-        'custom_str4',
-        'custom_str5',
-        'email_confirmation',
-        'confirmation_address'
-    ];
+    // Filter out empty values and get keys
+    const filteredData = {};
+    Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+            filteredData[key] = data[key].toString().trim();
+        }
+    });
     
-    // Build parameter string in PayFast's required order
+    // Sort keys ALPHABETICALLY (this is what PayFast actually expects)
+    const sortedKeys = Object.keys(filteredData).sort();
+    
+    // Build parameter string with alphabetically sorted fields
     const params = [];
     
-    fieldOrder.forEach(key => {
-        // Only include fields that exist and are not empty
-        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-            const value = data[key].toString().trim();
-            // URL encode and replace %20 with + (PayFast requirement)
-            const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
-            params.push(`${key}=${encodedValue}`);
-        }
+    sortedKeys.forEach(key => {
+        const value = filteredData[key];
+        // URL encode and replace %20 with + (PayFast requirement)
+        const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
+        params.push(`${key}=${encodedValue}`);
     });
     
     // Join parameters with &
@@ -115,7 +94,7 @@ function generateSignature(data, passphrase = null) {
     }
     
     // Debug log
-    console.log('🔐 Signature string:', paramString);
+    console.log('🔐 Signature string (alphabetical order):', paramString);
     
     // Generate MD5 hash
     const signature = crypto.createHash('md5').update(paramString).digest('hex');
