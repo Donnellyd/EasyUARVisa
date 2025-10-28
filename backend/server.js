@@ -106,6 +106,15 @@ app.post('/api/payments/start', async (req, res) => {
             });
         }
         
+        // Clean and trim input data
+        const cleanName = applicant_name.trim().replace(/\s+/g, ' ');
+        const cleanEmail = applicant_email.trim();
+        
+        // Split name properly
+        const nameParts = cleanName.split(' ').filter(part => part.length > 0);
+        const firstName = nameParts[0] || cleanName;
+        const lastName = nameParts.slice(1).join(' ') || cleanName;
+        
         // Generate unique reference
         const reference = `UAE-PAY-${Date.now()}`;
         
@@ -124,9 +133,9 @@ app.post('/api/payments/start', async (req, res) => {
             merchant_key: config.merchantKey,
             
             // Buyer details
-            name_first: applicant_name.split(' ')[0] || applicant_name,
-            name_last: applicant_name.split(' ').slice(1).join(' ') || applicant_name,
-            email_address: applicant_email,
+            name_first: firstName,
+            name_last: lastName,
+            email_address: cleanEmail,
             
             // Transaction details
             m_payment_id: reference,
