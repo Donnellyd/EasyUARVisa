@@ -10,37 +10,64 @@ const getCurrentDomain = () => {
 
 // Generate signature using the SAME logic as backend/server.js
 function generateSignature(data, passphrase = null) {
-    // Filter out empty values and get keys
-    const filteredData = {};
-    Object.keys(data).forEach(key => {
-        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-            filteredData[key] = data[key].toString().trim();
-        }
-    });
+    // PayFast DOCUMENTED field order for form submissions
+    const fieldOrder = [
+        'merchant_id',
+        'merchant_key',
+        'return_url',
+        'cancel_url',
+        'notify_url',
+        'name_first',
+        'name_last',
+        'email_address',
+        'cell_number',
+        'm_payment_id',
+        'amount',
+        'item_name',
+        'item_description',
+        'custom_int1',
+        'custom_int2',
+        'custom_int3',
+        'custom_int4',
+        'custom_int5',
+        'custom_str1',
+        'custom_str2',
+        'custom_str3',
+        'custom_str4',
+        'custom_str5',
+        'email_confirmation',
+        'confirmation_address',
+        'payment_method',
+        'subscription_type',
+        'billing_date',
+        'recurring_amount',
+        'frequency',
+        'cycles'
+    ];
     
-    // Sort keys ALPHABETICALLY (this is what PayFast actually expects)
-    const sortedKeys = Object.keys(filteredData).sort();
-    
-    // Build parameter string with alphabetically sorted fields
+    // Build parameter string in PayFast's documented order
     const params = [];
     const includedFields = [];
     
-    sortedKeys.forEach(key => {
-        const value = filteredData[key];
-        // URL encode and replace %20 with + (PayFast requirement)
-        const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
-        params.push(`${key}=${encodedValue}`);
-        includedFields.push({ name: key, value: value, encoded: encodedValue });
+    fieldOrder.forEach(key => {
+        // Only include fields that exist and are not empty
+        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+            const value = data[key].toString().trim();
+            // URL encode and replace %20 with + (PayFast requirement)
+            const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
+            params.push(`${key}=${encodedValue}`);
+            includedFields.push({ name: key, value: value, encoded: encodedValue });
+        }
     });
     
     // Join parameters with &
     let paramString = params.join('&');
     
-    // Add passphrase at the end if provided
+    // Add passphrase at the end if provided (ALWAYS LAST)
     if (passphrase) {
         const encodedPassphrase = encodeURIComponent(passphrase.trim()).replace(/%20/g, '+');
         paramString += `&passphrase=${encodedPassphrase}`;
-        includedFields.push({ name: 'passphrase', value: passphrase, encoded: encodedPassphrase });
+        includedFields.push({ name: 'passphrase', value: '***', encoded: '***' });
     }
     
     // Generate MD5 hash using CryptoJS
