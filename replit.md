@@ -26,8 +26,14 @@ The application integrates with a backend portal for application submission, sta
 ## Payment Integration
 Payment processing is a core feature, integrated through PayFast. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
 
+### Country-Based Currency Conversion
+The system uses the "country" field from the application form to determine payment currency:
+- **South Africa**: Automatically converts AED to ZAR using live exchange rates (via exchangerate-api.com)
+- **Other countries**: Displays AED pricing
+- **Payment page display**: For South African applicants, ZAR amount is shown prominently in RED, with AED shown as small reference text. A clear notice states "You will be charged ZAR X.XX via PayFast"
+
 ## PayFast Payment Gateway Architecture
-A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to PayFast payment processing. A PostgreSQL database tracks payment statuses, and security features include MD5 signature verification. The system supports both sandbox and live modes, controlled by environment variables.
+A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to PayFast payment processing. A PostgreSQL database tracks payment statuses, and security features include MD5 signature verification using PayFast's documented field order. The system supports both sandbox and live modes, controlled by environment variables.
 
 ### Database Schema
 ```sql
