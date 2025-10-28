@@ -120,12 +120,14 @@ function generateSignature(data, passphrase = null) {
         paramString += `&passphrase=${encodedPassphrase}`;
     }
     
-    // Debug log
-    console.log('🔐 Signature string (documented order):', paramString);
+    // Debug logs
+    console.log('\n🔐 ===== SIGNATURE GENERATION =====');
+    console.log('Signature string:', paramString);
     
     // Generate MD5 hash
     const signature = crypto.createHash('md5').update(paramString).digest('hex');
-    console.log('🔐 Generated signature:', signature);
+    console.log('Generated signature:', signature);
+    console.log('================================\n');
     
     return signature;
 }
@@ -209,6 +211,16 @@ app.post('/api/payments/start', async (req, res) => {
         );
         
         console.log('✅ Payment initiated:', reference);
+        
+        // Generate curl command for testing
+        console.log('\n📋 ===== CURL TEST COMMAND =====');
+        console.log('You can test this payment with the following curl command:\n');
+        const curlFields = [];
+        for (const [key, value] of Object.entries(paymentData)) {
+            curlFields.push(`  -d '${key}=${value}'`);
+        }
+        console.log(`curl -X POST '${config.baseUrl}' \\\n${curlFields.join(' \\\n')}`);
+        console.log('================================\n');
         
         // Return payment data for POST form submission (PayFast requirement)
         res.json({
