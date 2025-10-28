@@ -330,9 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSuccessModal(reference, totalFee) {
         console.log('Showing modal with reference:', reference, 'fee:', totalFee);
         
-        // Get applicant details for payment page
-        const applicantName = `${document.getElementById('firstName')?.value || ''} ${document.getElementById('lastName')?.value || ''}`.trim();
-        const applicantEmail = document.getElementById('email')?.value || '';
+        // Get applicant details for payment page - trim individual fields to prevent spacing issues
+        const firstName = (document.getElementById('firstName')?.value || '').trim();
+        const lastName = (document.getElementById('lastName')?.value || '').trim();
+        const applicantName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
+        const applicantEmail = (document.getElementById('email')?.value || '').trim();
         
         // Update modal content
         document.getElementById('applicationRef').textContent = reference;
