@@ -202,15 +202,13 @@ app.post('/api/payments/start', async (req, res) => {
             [reference, application_id, amount, 'ZAR', applicant_email, applicant_name, country, 'pending']
         );
         
-        // Build PayFast redirect URL with parameters
-        const params = new URLSearchParams(paymentData);
-        const paymentLink = `${config.baseUrl}?${params.toString()}`;
-        
         console.log('✅ Payment initiated:', reference);
         
+        // Return payment data for POST form submission (PayFast requirement)
         res.json({
             success: true,
-            paymentLink: paymentLink,
+            paymentUrl: config.baseUrl, // Where to POST the form
+            formData: paymentData,      // All form fields including signature
             reference: reference,
             gateway: 'payfast',
             sandbox: config.sandbox
