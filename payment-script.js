@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const applicantName = urlParams.get('name');
         const applicantEmail = urlParams.get('email');
         const amount = urlParams.get('amount');
+        const country = urlParams.get('country');
         
         if (!applicationId || !applicantName || !applicantEmail || !amount) {
             showError('Missing payment details. Please submit your application first.');
@@ -232,6 +233,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('applicantEmail').value = applicantEmail;
         document.getElementById('amount').value = amount;
         
+        // Pre-select country if provided in URL
+        const countrySelect = document.getElementById('country');
+        if (country && countrySelect) {
+            countrySelect.value = country;
+        }
+        
         // Display details
         document.getElementById('displayApplicationId').textContent = applicationId;
         document.getElementById('displayApplicantName').textContent = applicantName;
@@ -241,7 +248,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         updateAmountDisplay();
         
         // Add event listener to country dropdown to update amount display
-        const countrySelect = document.getElementById('country');
         if (countrySelect) {
             countrySelect.addEventListener('change', updateAmountDisplay);
         }
@@ -254,16 +260,31 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         if (!displayEl || !amount) return;
         
-        // Always show AED first
-        let displayText = `AED ${amount.toFixed(2)}`;
-        
-        // If South Africa, add ZAR conversion
+        // If South Africa, show ZAR prominently and AED as reference
         if (country === 'South Africa' && exchangeRates['ZAR']) {
             const zarAmount = amount * exchangeRates['ZAR'];
-            displayText = `AED ${amount.toFixed(2)} <span style="color: #666; font-size: 0.9em;">(≈ ZAR ${zarAmount.toFixed(2)})</span>`;
+            // ZAR in RED (prominent), AED as small reference text in grey
+            displayEl.innerHTML = `<span style="color: #c8102e; font-weight: 700; font-size: 1.5rem;">ZAR ${zarAmount.toFixed(2)}</span> <span style="color: #666; font-size: 0.85rem; font-weight: 400;">(approx. AED ${amount.toFixed(2)})</span>`;
+            
+            // Add payment notice
+            let noticeEl = document.getElementById('currencyNotice');
+            if (!noticeEl) {
+                noticeEl = document.createElement('div');
+                noticeEl.id = 'currencyNotice';
+                noticeEl.style.cssText = 'margin-top: 0.5rem; padding: 0.75rem; background: #f0f9ff; border-left: 3px solid #c8102e; font-size: 0.9rem; color: #333;';
+                displayEl.parentNode.appendChild(noticeEl);
+            }
+            noticeEl.innerHTML = `<i class="fas fa-info-circle" style="color: #c8102e;"></i> <strong>You will be charged ZAR ${zarAmount.toFixed(2)}</strong> via PayFast (South African payment gateway)`;
+        } else {
+            // For other countries, show AED only (in RED)
+            displayEl.innerHTML = `<span style="color: #c8102e; font-weight: 700; font-size: 1.5rem;">AED ${amount.toFixed(2)}</span>`;
+            
+            // Remove currency notice if it exists
+            const noticeEl = document.getElementById('currencyNotice');
+            if (noticeEl) {
+                noticeEl.remove();
+            }
         }
-        
-        displayEl.innerHTML = displayText;
     }
     
     function showError(message) {

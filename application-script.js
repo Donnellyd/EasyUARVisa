@@ -335,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const lastName = (document.getElementById('lastName')?.value || '').trim();
         const applicantName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
         const applicantEmail = (document.getElementById('email')?.value || '').trim();
+        const country = (document.getElementById('country')?.value || '').trim();
         
         // Update modal content
         document.getElementById('applicationRef').textContent = reference;
@@ -353,17 +354,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirect to payment page after 3 seconds
             setTimeout(() => {
-                redirectToPayment(reference, applicantName, applicantEmail, totalFee);
+                redirectToPayment(reference, applicantName, applicantEmail, totalFee, country);
             }, 3000);
         } else {
             console.error('Bootstrap or modal element not found');
             // Redirect immediately if modal doesn't work
-            redirectToPayment(reference, applicantName, applicantEmail, totalFee);
+            redirectToPayment(reference, applicantName, applicantEmail, totalFee, country);
         }
     }
     
-    function redirectToPayment(reference, name, email, amount) {
-        const paymentUrl = `payment.html?ref=${encodeURIComponent(reference)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${encodeURIComponent(amount)}`;
+    function redirectToPayment(reference, name, email, amount, country) {
+        const paymentUrl = `payment.html?ref=${encodeURIComponent(reference)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${encodeURIComponent(amount)}&country=${encodeURIComponent(country)}`;
         console.log('Redirecting to payment:', paymentUrl);
         window.location.href = paymentUrl;
     }
