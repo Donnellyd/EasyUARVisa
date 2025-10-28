@@ -31,6 +31,38 @@ function logStage(stage, details = '') {
 
 let countdownInterval = null;
 
+// Function to create and submit POST form to PayFast
+function submitPayFastForm(paymentUrl, formData) {
+    console.log('📝 Creating POST form for PayFast submission...');
+    console.log('Payment URL:', paymentUrl);
+    console.log('Form Data:', formData);
+    
+    // Create a form element
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = paymentUrl;
+    
+    // Add all form fields as hidden inputs
+    for (const [key, value] of Object.entries(formData)) {
+        if (value !== '' && value !== null && value !== undefined) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+            console.log(`  ✓ ${key}: ${value}`);
+        }
+    }
+    
+    // Add form to page (required for submission)
+    document.body.appendChild(form);
+    
+    console.log('🚀 Submitting form to PayFast...');
+    
+    // Submit the form
+    form.submit();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const paymentForm = document.getElementById('paymentForm');
     const paymentBtn = document.getElementById('paymentBtn');
@@ -99,17 +131,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Payment initiated:', data);
             
-            if (data.paymentLink) {
+            if (data.paymentUrl && data.formData) {
                 // Show success modal
                 const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
                 showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
                 
-                // Redirect to PayFast after a short delay
+                // Create and submit POST form to PayFast (required by PayFast)
                 setTimeout(() => {
-                    window.location.href = data.paymentLink;
+                    submitPayFastForm(data.paymentUrl, data.formData);
                 }, 2000);
             } else {
-                throw new Error('No payment link received from server');
+                throw new Error('No payment data received from server');
             }
             
         } catch (error) {
