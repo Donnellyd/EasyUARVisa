@@ -31,6 +31,25 @@ function logStage(stage, details = '') {
 
 let countdownInterval = null;
 
+// Exchange rates cache
+let exchangeRates = {};
+
+// Fetch exchange rates for currency conversion
+async function fetchExchangeRates() {
+    try {
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/AED');
+        if (!response.ok) throw new Error('Failed to fetch rates');
+        
+        const data = await response.json();
+        exchangeRates = data.rates;
+        console.log('Exchange rates loaded for payment conversion');
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        // Fallback rate for ZAR if API fails
+        exchangeRates = { 'ZAR': 4.8 };
+    }
+}
+
 // Function to create and submit POST form to PayFast
 function submitPayFastForm(paymentUrl, formData) {
     console.log('📝 Creating POST form for PayFast submission...');
@@ -63,9 +82,12 @@ function submitPayFastForm(paymentUrl, formData) {
     form.submit();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const paymentForm = document.getElementById('paymentForm');
     const paymentBtn = document.getElementById('paymentBtn');
+    
+    // Load exchange rates first
+    await fetchExchangeRates();
     
     // Get payment data from URL parameters
     loadPaymentDetails();
@@ -77,12 +99,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const applicationId = document.getElementById('applicationId').value;
         const applicantName = document.getElementById('applicantName').value;
         const applicantEmail = document.getElementById('applicantEmail').value;
-        const amount = document.getElementById('amount').value;
+        const aedAmount = parseFloat(document.getElementById('amount').value);
         const country = document.getElementById('country').value;
         
-        if (!applicationId || !applicantName || !applicantEmail || !amount || !country) {
+        if (!applicationId || !applicantName || !applicantEmail || !aedAmount || !country) {
             showError('Please fill in all required fields');
             return;
+        }
+        
+        // Convert AED to ZAR for South Africa (PayFast only accepts ZAR)
+        let paymentAmount = aedAmount;
+        if (country === 'South Africa' && exchangeRates['ZAR']) {
+            paymentAmount = aedAmount * exchangeRates['ZAR'];
+            console.log(`💱 Currency conversion: AED ${aedAmount.toFixed(2)} → ZAR ${paymentAmount.toFixed(2)} (Rate: ${exchangeRates['ZAR']})`);
         }
         
         // Disable button and show loading
@@ -113,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     application_id: applicationId,
                     applicant_name: applicantName,
                     applicant_email: applicantEmail,
-                    amount: parseFloat(amount),
+                    amount: paymentAmount,
                     country: country,
                     description: 'UAE Visa Application Fee'
                 })
@@ -207,7 +236,34 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('displayApplicationId').textContent = applicationId;
         document.getElementById('displayApplicantName').textContent = applicantName;
         document.getElementById('displayApplicantEmail').textContent = applicantEmail;
-        document.getElementById('displayAmount').textContent = 'AED ' + parseFloat(amount).toFixed(2);
+        
+        // Update amount display
+        updateAmountDisplay();
+        
+        // Add event listener to country dropdown to update amount display
+        const countrySelect = document.getElementById('country');
+        if (countrySelect) {
+            countrySelect.addEventListener('change', updateAmountDisplay);
+        }
+    }
+    
+    function updateAmountDisplay() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const country = document.getElementById('country').value;
+        const displayEl = document.getElementById('displayAmount');
+        
+        if (!displayEl || !amount) return;
+        
+        // Always show AED first
+        let displayText = `AED ${amount.toFixed(2)}`;
+        
+        // If South Africa, add ZAR conversion
+        if (country === 'South Africa' && exchangeRates['ZAR']) {
+            const zarAmount = amount * exchangeRates['ZAR'];
+            displayText = `AED ${amount.toFixed(2)} <span style="color: #666; font-size: 0.9em;">(≈ ZAR ${zarAmount.toFixed(2)})</span>`;
+        }
+        
+        displayEl.innerHTML = displayText;
     }
     
     function showError(message) {
