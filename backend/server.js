@@ -63,27 +63,38 @@ const getPayFastConfig = () => {
 
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
-    // Create parameter string with raw values (no URL encoding for signature)
-    let paramString = '';
-    const sortedKeys = Object.keys(data).sort();
-    
-    sortedKeys.forEach(key => {
-        if (key !== 'signature') {
-            // Use raw values for signature calculation
-            paramString += `${key}=${data[key].toString().trim()}&`;
+    // Remove empty values and signature field - PayFast requirement
+    const cleanData = {};
+    Object.keys(data).forEach(key => {
+        if (key !== 'signature' && data[key] !== '' && data[key] !== null && data[key] !== undefined) {
+            cleanData[key] = data[key].toString().trim();
         }
     });
     
-    // Remove last ampersand
-    paramString = paramString.slice(0, -1);
+    // Sort keys alphabetically
+    const sortedKeys = Object.keys(cleanData).sort();
     
-    // Add passphrase if provided (raw value, no encoding)
+    // Build parameter string with URL encoding
+    let paramString = sortedKeys.map(key => {
+        // URL encode and replace %20 with + (PayFast requirement)
+        const encodedValue = encodeURIComponent(cleanData[key]).replace(/%20/g, '+');
+        return `${key}=${encodedValue}`;
+    }).join('&');
+    
+    // Add passphrase if provided
     if (passphrase) {
-        paramString += `&passphrase=${passphrase.trim()}`;
+        const encodedPassphrase = encodeURIComponent(passphrase.trim()).replace(/%20/g, '+');
+        paramString += `&passphrase=${encodedPassphrase}`;
     }
     
+    // Debug log (remove in production)
+    console.log('🔐 Signature string:', paramString);
+    
     // Generate MD5 hash
-    return crypto.createHash('md5').update(paramString).digest('hex');
+    const signature = crypto.createHash('md5').update(paramString).digest('hex');
+    console.log('🔐 Generated signature:', signature);
+    
+    return signature;
 }
 
 // POST /api/payments/start - Initiate PayFast payment
