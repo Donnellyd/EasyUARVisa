@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFast Signature Tester - UAE VISA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .signature-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background: #333;
+        }
+        .field-list {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .field-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .field-item:last-child {
+            border-bottom: none;
+        }
+        .field-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        .field-value {
+            color: #c8102e;
+            margin-left: 10px;
+        }
+        .result-section {
+            margin-top: 30px;
+        }
+        .result-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-passport"></i>
+                <span>UAE VISA</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px; margin-bottom: 50px;">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h2 style="color: #2d3748; margin-bottom: 30px;">
+                    <i class="fas fa-shield-alt" style="color: #c8102e;"></i>
+                    PayFast Signature Tester
+                </h2>
+
+                <div class="card" style="border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div class="card-body" style="padding: 30px;">
+                        <form id="testForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Application ID</label>
+                                    <input type="text" class="form-control" id="applicationId" value="UAE-20251028-TEST" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" value="Morgan" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" value="Molefe" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" value="test456@gmail.com" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Amount (ZAR)</label>
+                                    <input type="number" step="0.01" class="form-control" id="amount" value="3686.34" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Country</label>
+                                    <input type="text" class="form-control" id="country" value="South Africa" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="background: #000; border: none; padding: 12px 30px;">
+                                <i class="fas fa-calculator"></i> Generate Signature
+                            </button>
+                        </form>
+
+                        <div id="results" style="display: none;">
+                            <div class="result-section">
+                                <div class="result-label">
+                                    <i class="fas fa-list"></i> Fields in Signature (Current Order):
+                                </div>
+                                <div class="field-list" id="fieldsList"></div>
+                            </div>
+
+                            <div class="result-section">
+                                <div class="result-label">
+                                    <i class="fas fa-code"></i> Signature String (Before MD5):
+                                </div>
+                                <div class="signature-box" id="signatureString"></div>
+                                <button class="copy-btn" onclick="copyToClipboard('signatureString')">
+                                    <i class="fas fa-copy"></i> Copy String
+                                </button>
+                            </div>
+
+                            <div class="result-section">
+                                <div class="result-label">
+                                    <i class="fas fa-fingerprint"></i> MD5 Signature Hash:
+                                </div>
+                                <div class="signature-box" id="md5Hash" style="color: #c8102e; font-weight: 600; font-size: 1.2em;"></div>
+                                <button class="copy-btn" onclick="copyToClipboard('md5Hash')">
+                                    <i class="fas fa-copy"></i> Copy Hash
+                                </button>
+                            </div>
+
+                            <div class="result-section">
+                                <div class="result-label">
+                                    <i class="fas fa-file-code"></i> URL-Encoded Payload for ITN Tester:
+                                </div>
+                                <div class="signature-box" id="urlEncodedPayload" style="font-size: 0.9em;"></div>
+                                <button class="copy-btn" onclick="copyToClipboard('urlEncodedPayload')">
+                                    <i class="fas fa-copy"></i> Copy Payload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="margin-top: 30px;">
+                    <h5><i class="fas fa-info-circle"></i> How to Use:</h5>
+                    <ol>
+                        <li>Fill in the test payment details above (or use the defaults)</li>
+                        <li>Click "Generate Signature" to see the exact payload being generated</li>
+                        <li>Copy the "URL-Encoded Payload" and paste it into PayFast's ITN Tester</li>
+                        <li>Compare PayFast's generated signature with our MD5 hash</li>
+                        <li>If they don't match, we know exactly what needs to be fixed!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="signature-test-script.js"></script>
+</body>
+</html>
