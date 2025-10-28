@@ -63,22 +63,23 @@ const getPayFastConfig = () => {
 
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
-    // Create parameter string
+    // Create parameter string with raw values (no URL encoding for signature)
     let paramString = '';
     const sortedKeys = Object.keys(data).sort();
     
     sortedKeys.forEach(key => {
         if (key !== 'signature') {
-            paramString += `${key}=${encodeURIComponent(data[key].toString().trim()).replace(/%20/g, '+')}&`;
+            // Use raw values for signature calculation
+            paramString += `${key}=${data[key].toString().trim()}&`;
         }
     });
     
     // Remove last ampersand
     paramString = paramString.slice(0, -1);
     
-    // Add passphrase if provided
+    // Add passphrase if provided (raw value, no encoding)
     if (passphrase) {
-        paramString += `&passphrase=${encodeURIComponent(passphrase.trim()).replace(/%20/g, '+')}`;
+        paramString += `&passphrase=${passphrase.trim()}`;
     }
     
     // Generate MD5 hash
