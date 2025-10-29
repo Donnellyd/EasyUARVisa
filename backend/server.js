@@ -61,6 +61,16 @@ const getPayFastConfig = () => {
     };
 };
 
+// PayGate configuration
+const getPayGateConfig = () => {
+    return {
+        paygateId: process.env.PAYGATE_ID || '10011072130',
+        encryptionKey: process.env.PAYGATE_ENCRYPTION_KEY || 'secret',
+        initiateUrl: 'https://secure.paygate.co.za/payweb3/initiate.trans',
+        processUrl: 'https://secure.paygate.co.za/payweb3/process.trans'
+    };
+};
+
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
     // PayFast DOCUMENTED field order for form submissions
@@ -130,6 +140,24 @@ function generateSignature(data, passphrase = null) {
     console.log('================================\n');
     
     return signature;
+}
+
+// Generate MD5 checksum for PayGate
+function generatePayGateChecksum(data, encryptionKey) {
+    // Sort keys alphabetically and concatenate values
+    const sortedKeys = Object.keys(data).sort();
+    const values = sortedKeys.map(key => data[key]).join('');
+    const checksumString = values + encryptionKey;
+    
+    // Generate MD5 hash
+    const checksum = crypto.createHash('md5').update(checksumString).digest('hex');
+    
+    console.log('\n🔐 ===== PAYGATE CHECKSUM GENERATION =====');
+    console.log('Checksum string:', checksumString);
+    console.log('Generated checksum:', checksum);
+    console.log('========================================\n');
+    
+    return checksum;
 }
 
 // POST /api/payments/start - Initiate PayFast payment
@@ -315,12 +343,214 @@ app.get('/api/payments/status/:reference', async (req, res) => {
     }
 });
 
+// POST /api/paygate/initiate - Initiate PayGate payment
+app.post('/api/paygate/initiate', async (req, res) => {
+    try {
+        console.log('💳 PayGate payment request received:', req.body);
+        
+        const {
+            application_id,
+            applicant_name,
+            applicant_email,
+            amount,
+            country,
+            description = 'UAE Visa Application Fee'
+        } = req.body;
+        
+        // Validation
+        if (!application_id || !applicant_name || !applicant_email || !amount) {
+            return res.status(400).json({
+                error: 'Missing required fields'
+            });
+        }
+        
+        // Generate unique reference
+        const reference = `UAE-PAYGATE-${Date.now()}`;
+        
+        // Get PayGate config
+        const config = getPayGateConfig();
+        
+        // Get the base URL for return/notify URLs
+        const appBaseUrl = process.env.REPLIT_DEV_DOMAIN 
+            ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+            : 'http://localhost:5000';
+        
+        // Convert amount to cents (PayGate requires cents)
+        const amountInCents = Math.round(parseFloat(amount) * 100);
+        
+        // Build initiate request payload
+        const initiatePayload = {
+            PAYGATE_ID: config.paygateId,
+            REFERENCE: reference,
+            AMOUNT: amountInCents,
+            CURRENCY: 'ZAR',
+            RETURN_URL: `${appBaseUrl}/paygate-return.html`,
+            TRANSACTION_DATE: new Date().toISOString().split('T')[0].replace(/-/g, ' '),
+            LOCALE: 'en-za',
+            COUNTRY: 'ZAF',
+            EMAIL: applicant_email
+        };
+        
+        // Add notify URL if not localhost
+        if (!appBaseUrl.includes('localhost')) {
+            initiatePayload.NOTIFY_URL = `${appBaseUrl}/api/paygate/notify`;
+        }
+        
+        // Generate checksum
+        initiatePayload.CHECKSUM = generatePayGateChecksum(initiatePayload, config.encryptionKey);
+        
+        // Make request to PayGate
+        const axios = require('axios');
+        const initiateResponse = await axios.post(config.initiateUrl, 
+            new URLSearchParams(initiatePayload).toString(),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        );
+        
+        // Parse response (format: KEY=VALUE&KEY=VALUE)
+        const responseData = {};
+        initiateResponse.data.split('&').forEach(item => {
+            const [key, value] = item.split('=');
+            responseData[key] = value;
+        });
+        
+        console.log('PayGate initiate response:', responseData);
+        
+        if (responseData.PAY_REQUEST_ID) {
+            // Save payment to database
+            await pool.query(
+                `INSERT INTO payments (reference, application_id, amount, currency, email, name, country, status, payment_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                [reference, application_id, amount, 'ZAR', applicant_email, applicant_name, country, 'pending', responseData.PAY_REQUEST_ID]
+            );
+            
+            console.log('✅ PayGate payment initiated:', reference);
+            
+            // Return redirect URL
+            const redirectUrl = `${config.processUrl}?PAY_REQUEST_ID=${responseData.PAY_REQUEST_ID}&CHECKSUM=${responseData.CHECKSUM}`;
+            
+            res.json({
+                success: true,
+                paymentUrl: redirectUrl,
+                reference: reference,
+                payRequestId: responseData.PAY_REQUEST_ID,
+                gateway: 'paygate'
+            });
+        } else {
+            throw new Error('PayGate initiate failed: ' + initiateResponse.data);
+        }
+        
+    } catch (error) {
+        console.error('❌ PayGate payment error:', error);
+        res.status(500).json({
+            error: 'Failed to initiate PayGate payment',
+            detail: error.message
+        });
+    }
+});
+
+// GET /api/paygate/return - Handle return from PayGate
+app.get('/api/paygate/return', async (req, res) => {
+    try {
+        console.log('📡 PayGate return received:', req.query);
+        
+        const { PAY_REQUEST_ID, TRANSACTION_STATUS, REFERENCE, CHECKSUM } = req.query;
+        
+        // Verify checksum
+        const config = getPayGateConfig();
+        const verifyData = {
+            PAYGATE_ID: config.paygateId,
+            PAY_REQUEST_ID: PAY_REQUEST_ID || '',
+            REFERENCE: REFERENCE || ''
+        };
+        
+        const expectedChecksum = generatePayGateChecksum(verifyData, config.encryptionKey);
+        
+        // Transaction status codes: 1 = Approved, 2 = Declined, 4 = Cancelled by user
+        let status = 'pending';
+        if (TRANSACTION_STATUS === '1') {
+            status = 'paid';
+        } else if (TRANSACTION_STATUS === '2') {
+            status = 'failed';
+        } else if (TRANSACTION_STATUS === '4') {
+            status = 'cancelled';
+        }
+        
+        // Update database
+        if (REFERENCE) {
+            await pool.query(
+                `UPDATE payments 
+                 SET status = $1, updated_at = CURRENT_TIMESTAMP 
+                 WHERE reference = $2`,
+                [status, REFERENCE]
+            );
+            
+            console.log(`✅ PayGate payment ${REFERENCE} updated to status: ${status}`);
+        }
+        
+        res.json({ status, reference: REFERENCE });
+        
+    } catch (error) {
+        console.error('❌ PayGate return error:', error);
+        res.status(500).json({ error: 'Return processing error' });
+    }
+});
+
+// POST /api/paygate/notify - Handle IPN from PayGate
+app.post('/api/paygate/notify', async (req, res) => {
+    try {
+        console.log('📡 PayGate notify received:', req.body);
+        
+        const notifyData = req.body;
+        const config = getPayGateConfig();
+        
+        // Verify checksum
+        const receivedChecksum = notifyData.CHECKSUM;
+        delete notifyData.CHECKSUM;
+        
+        const expectedChecksum = generatePayGateChecksum(notifyData, config.encryptionKey);
+        
+        if (receivedChecksum !== expectedChecksum) {
+            console.error('❌ Invalid PayGate checksum');
+            return res.status(400).send('Invalid checksum');
+        }
+        
+        const reference = notifyData.REFERENCE;
+        const transactionStatus = notifyData.TRANSACTION_STATUS;
+        
+        // Update status
+        let status = 'pending';
+        if (transactionStatus === '1') {
+            status = 'paid';
+        } else if (transactionStatus === '2') {
+            status = 'failed';
+        } else if (transactionStatus === '4') {
+            status = 'cancelled';
+        }
+        
+        await pool.query(
+            `UPDATE payments 
+             SET status = $1, updated_at = CURRENT_TIMESTAMP 
+             WHERE reference = $2`,
+            [status, reference]
+        );
+        
+        console.log(`✅ PayGate notify: ${reference} updated to ${status}`);
+        
+        res.status(200).send('OK');
+        
+    } catch (error) {
+        console.error('❌ PayGate notify error:', error);
+        res.status(500).send('Notify error');
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        service: 'PayFast Payment Gateway',
-        sandbox: getPayFastConfig().sandbox
+        service: 'Payment Gateway (PayFast + PayGate)',
+        payfast_sandbox: getPayFastConfig().sandbox,
+        gateways: ['payfast', 'paygate']
     });
 });
 
