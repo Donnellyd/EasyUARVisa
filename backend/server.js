@@ -729,14 +729,186 @@ app.post('/api/ikhokha/webhook', async (req, res) => {
     }
 });
 
+// POST /api/peach/initiate - Initiate Peach Payments checkout
+app.post('/api/peach/initiate', async (req, res) => {
+    try {
+        console.log('💳 Peach Payments request received:', req.body);
+        
+        const {
+            application_id,
+            applicant_name,
+            applicant_email,
+            amount,
+            country,
+            description = 'UAE Visa Application Fee'
+        } = req.body;
+        
+        // Validation
+        if (!application_id || !applicant_name || !applicant_email || !amount) {
+            return res.status(400).json({
+                error: 'Missing required fields'
+            });
+        }
+        
+        // Get Peach config
+        const config = getPeachConfig();
+        
+        if (!config.entityId || !config.accessToken) {
+            throw new Error('Peach Payments credentials not configured. Please set PEACH_ENTITY_ID and PEACH_ACCESS_TOKEN');
+        }
+        
+        // Generate unique reference
+        const reference = `UAE-PEACH-${Date.now()}`;
+        
+        // Get the base URL for return URLs
+        const appBaseUrl = process.env.REPLIT_DEV_DOMAIN 
+            ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+            : 'http://localhost:5000';
+        
+        // Split name for Peach
+        const nameParts = applicant_name.trim().split(' ');
+        const givenName = nameParts[0] || applicant_name;
+        const surname = nameParts.slice(1).join(' ') || applicant_name;
+        
+        // Prepare Peach checkout request
+        const checkoutData = {
+            'authentication.entityId': config.entityId,
+            'amount': parseFloat(amount).toFixed(2),
+            'currency': 'ZAR',
+            'paymentType': 'DB', // DB = Debit (immediate payment)
+            'merchantTransactionId': reference,
+            'customer.email': applicant_email,
+            'customer.givenName': givenName,
+            'customer.surname': surname,
+            'billing.country': 'ZA',
+            'shopperResultUrl': `${appBaseUrl}/peach-return.html`,
+            'notificationUrl': `${appBaseUrl}/api/peach/webhook`
+        };
+        
+        // Generate signature
+        checkoutData.signature = generatePeachSignature(checkoutData, config.accessToken);
+        
+        console.log('\n🔐 ===== PEACH CHECKOUT REQUEST =====');
+        console.log('API URL:', `${config.apiUrl}/checkout/initiate`);
+        console.log('Entity ID:', config.entityId);
+        console.log('Test Mode:', config.testMode);
+        console.log('========================================\n');
+        
+        // Make request to Peach Payments
+        const axios = require('axios');
+        const peachResponse = await axios.post(
+            `${config.apiUrl}/checkout/initiate`,
+            new URLSearchParams(checkoutData).toString(),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+        );
+        
+        console.log('Peach API response:', peachResponse.data);
+        
+        if (peachResponse.data && peachResponse.data.redirectUrl) {
+            // Save payment to database
+            await pool.query(
+                `INSERT INTO payments (reference, application_id, amount, currency, email, name, country, status, payment_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                [reference, application_id, amount, 'ZAR', applicant_email, applicant_name, country, 'pending', peachResponse.data.checkoutId || null]
+            );
+            
+            console.log('✅ Peach payment initiated:', reference);
+            
+            // Return redirect URL
+            res.json({
+                success: true,
+                paymentUrl: peachResponse.data.redirectUrl,
+                reference: reference,
+                checkoutId: peachResponse.data.checkoutId,
+                gateway: 'peach',
+                testMode: config.testMode
+            });
+        } else {
+            throw new Error('Peach API did not return redirect URL');
+        }
+        
+    } catch (error) {
+        console.error('❌ Peach payment error:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Failed to initiate Peach payment',
+            detail: error.response?.data || error.message
+        });
+    }
+});
+
+// POST /api/peach/webhook - Handle Peach Payments webhook notifications
+app.post('/api/peach/webhook', async (req, res) => {
+    try {
+        console.log('📡 Peach webhook received:', req.body);
+        
+        const webhookData = req.body;
+        const receivedSignature = webhookData.signature;
+        const reference = webhookData.merchantTransactionId;
+        const resultCode = webhookData['result.code'];
+        const checkoutId = webhookData.checkoutId;
+        
+        if (!reference) {
+            return res.status(400).send('Missing reference');
+        }
+        
+        // Verify signature
+        const config = getPeachConfig();
+        const dataToVerify = { ...webhookData };
+        delete dataToVerify.signature;
+        
+        const expectedSignature = generatePeachSignature(dataToVerify, config.accessToken);
+        
+        if (receivedSignature !== expectedSignature) {
+            console.error('❌ Invalid Peach signature');
+            return res.status(400).send('Invalid signature');
+        }
+        
+        // Map Peach result codes to our status
+        let paymentStatus = 'pending';
+        
+        // Success codes start with 000.000 or 000.100
+        if (resultCode && (resultCode.startsWith('000.000') || resultCode.startsWith('000.100'))) {
+            paymentStatus = 'paid';
+        } else if (resultCode && resultCode.startsWith('000.200')) {
+            paymentStatus = 'pending';
+        } else if (resultCode && resultCode.startsWith('800.')) {
+            paymentStatus = 'pending'; // Pending transaction states
+        } else {
+            paymentStatus = 'failed';
+        }
+        
+        // Update database
+        await pool.query(
+            `UPDATE payments 
+             SET status = $1, updated_at = CURRENT_TIMESTAMP 
+             WHERE reference = $2`,
+            [paymentStatus, reference]
+        );
+        
+        console.log(`✅ Peach payment ${reference} updated to status: ${paymentStatus} (code: ${resultCode})`);
+        
+        // Must return 200 to acknowledge receipt
+        res.status(200).send('OK');
+        
+    } catch (error) {
+        console.error('❌ Peach webhook error:', error);
+        res.status(500).send('Webhook error');
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        service: 'Payment Gateway (PayFast + PayGate + iKhokha)',
+        service: 'Payment Gateway (PayFast + PayGate + iKhokha + Peach)',
         payfast_sandbox: getPayFastConfig().sandbox,
         ikhokha_test: getIKhokhaConfig().testMode,
-        gateways: ['payfast', 'paygate', 'ikhokha']
+        peach_test: getPeachConfig().testMode,
+        gateways: ['payfast', 'paygate', 'ikhokha', 'peach']
     });
 });
 
@@ -746,5 +918,6 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`📍 Base URL: http://localhost:${PORT}`);
     console.log(`🧪 PayFast Sandbox:`, getPayFastConfig().sandbox);
     console.log(`🧪 iKhokha Test Mode:`, getIKhokhaConfig().testMode);
-    console.log(`💳 Ready to process payments via PayFast, PayGate, and iKhokha`);
+    console.log(`🧪 Peach Test Mode:`, getPeachConfig().testMode);
+    console.log(`💳 Ready to process payments via PayFast, PayGate, iKhokha, and Peach`);
 });
