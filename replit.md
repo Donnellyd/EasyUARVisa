@@ -24,16 +24,45 @@ The project maintains a clear separation of concerns with HTML, CSS, and JavaScr
 The application integrates with a backend portal for application submission, status tracking, and document uploads. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality.
 
 ## Payment Integration
-Payment processing is a core feature, integrated through PayFast. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
+Payment processing is a core feature supporting **multiple payment gateways** for South African visa applicants. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
 
 ### Country-Based Currency Conversion
 The system uses the "country" field from the application form to determine payment currency:
 - **South Africa**: Automatically converts AED to ZAR using live exchange rates (via exchangerate-api.com)
 - **Other countries**: Displays AED pricing
-- **Payment page display**: For South African applicants, ZAR amount is shown prominently in RED, with AED shown as small reference text. A clear notice states "You will be charged ZAR X.XX via PayFast"
+- **Payment page display**: For South African applicants, ZAR amount is shown prominently in RED, with AED shown as small reference text. A clear notice states "You will be charged ZAR X.XX"
 
-## PayFast Payment Gateway Architecture
-A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to PayFast payment processing. A PostgreSQL database tracks payment statuses, and security features include MD5 signature verification using PayFast's documented field order. The system supports both sandbox and live modes, controlled by environment variables.
+## Multi-Gateway Payment Architecture
+A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to payment gateway integrations. A PostgreSQL database tracks payment statuses across all gateways.
+
+### Supported Payment Gateways
+
+1. **PayFast** (Sandbox Mode)
+   - MD5 signature verification using PayFast's documented field order
+   - POST form submission to PayFast
+   - Return URL: `payment-success.html`
+   - Environment variables: `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, `PAYFAST_SANDBOX`
+
+2. **PayGate**
+   - MD5 checksum validation
+   - Redirect-based flow
+   - Return URL: `paygate-return.html`
+   - Environment variables: `PAYGATE_ID`, `PAYGATE_ENCRYPTION_KEY`
+
+3. **iKhokha** (Test Mode)
+   - REST API integration
+   - Application ID/Secret authentication
+   - Return URL: `ikhokha-return.html`
+   - Environment variables: `IKHOKHA_APPLICATION_ID`, `IKHOKHA_APPLICATION_SECRET`, `IKHOKHA_TEST_MODE`
+
+4. **Peach Payments** (Test Mode) - **NEW**
+   - HMAC SHA-256 signature verification
+   - Hosted checkout integration
+   - South Africa's leading payment gateway (2.95% card fees, 1.5% Pay by Bank)
+   - Supports cards, Apple Pay, EFT, Capitec Pay, BNPL options
+   - Return URL: `peach-return.html`
+   - Environment variables: `PEACH_ENTITY_ID`, `PEACH_ACCESS_TOKEN`, `PEACH_TEST_MODE`
+   - Result codes: 000.000.xxx or 000.100.xxx = success, 000.200.xxx = pending
 
 ### Database Schema
 ```sql
@@ -70,17 +99,33 @@ CREATE TABLE payments (
 - **Flask Backend**: Python web framework
 - **Gunicorn**: WSGI server
 
-## Payment Gateway
-- **PayFast**: Primary payment processor.
-  - Merchant ID, Merchant Key, Passphrase stored in Replit Secrets.
-  - Sandbox and Live modes configurable via `PAYFAST_SANDBOX` environment variable.
+## Payment Gateways
+- **PayFast**: Sandbox mode for testing
+- **PayGate**: South African payment gateway
+- **iKhokha**: eCommerce payment gateway with test mode
+- **Peach Payments**: Leading SA gateway with multiple payment methods (cards, wallets, EFT)
 
 ## Backend Services
-- **Node.js Express**: Dedicated backend for PayFast integration.
-- **PostgreSQL**: Database for payment tracking.
+- **Node.js Express**: Dedicated backend for all payment gateway integrations (port 3000)
+- **PostgreSQL**: Database for payment tracking
 
 ## Environment Variables (Replit Secrets)
+### PayFast
 - `PAYFAST_MERCHANT_ID`
 - `PAYFAST_MERCHANT_KEY`
 - `PAYFAST_PASSPHRASE`
 - `PAYFAST_SANDBOX`
+
+### PayGate
+- `PAYGATE_ID`
+- `PAYGATE_ENCRYPTION_KEY`
+
+### iKhokha
+- `IKHOKHA_APPLICATION_ID`
+- `IKHOKHA_APPLICATION_SECRET`
+- `IKHOKHA_TEST_MODE`
+
+### Peach Payments
+- `PEACH_ENTITY_ID`
+- `PEACH_ACCESS_TOKEN`
+- `PEACH_TEST_MODE`
