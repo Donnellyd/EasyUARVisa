@@ -71,6 +71,16 @@ const getPayGateConfig = () => {
     };
 };
 
+// iKhokha configuration
+const getIKhokhaConfig = () => {
+    return {
+        applicationId: process.env.IKHOKHA_APPLICATION_ID || '',
+        applicationSecret: process.env.IKHOKHA_APPLICATION_SECRET || '',
+        apiUrl: 'https://api.ikhokha.com/api/v1',
+        testMode: process.env.IKHOKHA_TEST_MODE !== 'false' // Default to test mode
+    };
+};
+
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
     // PayFast DOCUMENTED field order for form submissions
@@ -544,20 +554,164 @@ app.post('/api/paygate/notify', async (req, res) => {
     }
 });
 
+// POST /api/ikhokha/initiate - Initiate iKhokha payment
+app.post('/api/ikhokha/initiate', async (req, res) => {
+    try {
+        console.log('💳 iKhokha payment request received:', req.body);
+        
+        const {
+            application_id,
+            applicant_name,
+            applicant_email,
+            amount,
+            country,
+            description = 'UAE Visa Application Fee'
+        } = req.body;
+        
+        // Validation
+        if (!application_id || !applicant_name || !applicant_email || !amount) {
+            return res.status(400).json({
+                error: 'Missing required fields'
+            });
+        }
+        
+        // Generate unique reference
+        const reference = `UAE-IKHOKHA-${Date.now()}`;
+        
+        // Get iKhokha config
+        const config = getIKhokhaConfig();
+        
+        if (!config.applicationId || !config.applicationSecret) {
+            throw new Error('iKhokha credentials not configured. Please set IKHOKHA_APPLICATION_ID and IKHOKHA_APPLICATION_SECRET');
+        }
+        
+        // Get the base URL for return/cancel URLs
+        const appBaseUrl = process.env.REPLIT_DEV_DOMAIN 
+            ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+            : 'http://localhost:5000';
+        
+        // Prepare iKhokha payment request
+        const ikPayload = {
+            applicationId: config.applicationId,
+            applicationSecret: config.applicationSecret,
+            amount: parseFloat(amount).toFixed(2),
+            currency: 'ZAR',
+            reference: reference,
+            customerEmail: applicant_email,
+            customerName: applicant_name,
+            description: `${description} - ${application_id}`,
+            successUrl: `${appBaseUrl}/ikhokha-return.html?status=success&ref=${reference}`,
+            cancelUrl: `${appBaseUrl}/ikhokha-return.html?status=cancelled&ref=${reference}`,
+            webhookUrl: `${appBaseUrl}/api/ikhokha/webhook`,
+            testMode: config.testMode
+        };
+        
+        console.log('\n🔐 ===== IKHOKHA API REQUEST =====');
+        console.log('API URL:', `${config.apiUrl}/payment/link`);
+        console.log('Test Mode:', config.testMode);
+        console.log('========================================\n');
+        
+        // Make request to iKhokha API
+        const axios = require('axios');
+        const ikResponse = await axios.post(
+            `${config.apiUrl}/payment/link`,
+            ikPayload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            }
+        );
+        
+        console.log('iKhokha API response:', ikResponse.data);
+        
+        if (ikResponse.data && ikResponse.data.paymentUrl) {
+            // Save payment to database
+            await pool.query(
+                `INSERT INTO payments (reference, application_id, amount, currency, email, name, country, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [reference, application_id, amount, 'ZAR', applicant_email, applicant_name, country, 'pending']
+            );
+            
+            console.log('✅ iKhokha payment initiated:', reference);
+            
+            // Return payment URL for redirect
+            res.json({
+                success: true,
+                paymentUrl: ikResponse.data.paymentUrl,
+                reference: reference,
+                gateway: 'ikhokha',
+                testMode: config.testMode
+            });
+        } else {
+            throw new Error('iKhokha API did not return payment URL');
+        }
+        
+    } catch (error) {
+        console.error('❌ iKhokha payment error:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Failed to initiate iKhokha payment',
+            detail: error.response?.data || error.message
+        });
+    }
+});
+
+// POST /api/ikhokha/webhook - Handle iKhokha webhook notifications
+app.post('/api/ikhokha/webhook', async (req, res) => {
+    try {
+        console.log('📡 iKhokha webhook received:', req.body);
+        
+        const { reference, status, transactionId } = req.body;
+        
+        if (!reference) {
+            return res.status(400).send('Missing reference');
+        }
+        
+        // Map iKhokha status to our status
+        let paymentStatus = 'pending';
+        if (status === 'COMPLETED' || status === 'SUCCESS') {
+            paymentStatus = 'paid';
+        } else if (status === 'FAILED') {
+            paymentStatus = 'failed';
+        } else if (status === 'CANCELLED') {
+            paymentStatus = 'cancelled';
+        }
+        
+        // Update database
+        await pool.query(
+            `UPDATE payments 
+             SET status = $1, payment_id = $2, updated_at = CURRENT_TIMESTAMP 
+             WHERE reference = $3`,
+            [paymentStatus, transactionId || null, reference]
+        );
+        
+        console.log(`✅ iKhokha payment ${reference} updated to status: ${paymentStatus}`);
+        
+        res.status(200).json({ received: true });
+        
+    } catch (error) {
+        console.error('❌ iKhokha webhook error:', error);
+        res.status(500).send('Webhook error');
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        service: 'Payment Gateway (PayFast + PayGate)',
+        service: 'Payment Gateway (PayFast + PayGate + iKhokha)',
         payfast_sandbox: getPayFastConfig().sandbox,
-        gateways: ['payfast', 'paygate']
+        ikhokha_test: getIKhokhaConfig().testMode,
+        gateways: ['payfast', 'paygate', 'ikhokha']
     });
 });
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 PayFast Payment Server running on port ${PORT}`);
+    console.log(`🚀 Payment Gateway Server running on port ${PORT}`);
     console.log(`📍 Base URL: http://localhost:${PORT}`);
-    console.log(`🧪 Sandbox mode:`, getPayFastConfig().sandbox);
-    console.log(`💳 Ready to process payments`);
+    console.log(`🧪 PayFast Sandbox:`, getPayFastConfig().sandbox);
+    console.log(`🧪 iKhokha Test Mode:`, getIKhokhaConfig().testMode);
+    console.log(`💳 Ready to process payments via PayFast, PayGate, and iKhokha`);
 });

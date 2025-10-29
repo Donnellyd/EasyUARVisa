@@ -129,9 +129,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         const currentDomain = window.location.origin;
         
         // Choose backend endpoint based on selected gateway
-        const backendURL = gateway === 'paygate' 
-            ? `${currentDomain}/api/paygate/initiate`
-            : `${currentDomain}/api/payments/start`;
+        let backendURL;
+        if (gateway === 'paygate') {
+            backendURL = `${currentDomain}/api/paygate/initiate`;
+        } else if (gateway === 'ikhokha') {
+            backendURL = `${currentDomain}/api/ikhokha/initiate`;
+        } else {
+            backendURL = `${currentDomain}/api/payments/start`;
+        }
         
         try {
             // Stage 2: Calling backend
@@ -175,6 +180,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }, 2000);
                 } else {
                     throw new Error('No payment URL received from PayGate');
+                }
+            } else if (data.gateway === 'ikhokha') {
+                // iKhokha: Direct redirect to payment URL
+                if (data.paymentUrl) {
+                    const testNote = data.testMode ? ' (Test Mode)' : '';
+                    showSuccessModal(`Payment initiated successfully!${testNote} Redirecting to iKhokha...`);
+                    setTimeout(() => {
+                        window.location.href = data.paymentUrl;
+                    }, 2000);
+                } else {
+                    throw new Error('No payment URL received from iKhokha');
                 }
             } else if (data.gateway === 'payfast') {
                 // PayFast: Submit POST form
