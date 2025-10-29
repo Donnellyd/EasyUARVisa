@@ -101,13 +101,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         const applicantEmail = document.getElementById('applicantEmail').value;
         const aedAmount = parseFloat(document.getElementById('amount').value);
         const country = document.getElementById('country').value;
+        const gateway = document.getElementById('paymentGateway').value;
         
-        if (!applicationId || !applicantName || !applicantEmail || !aedAmount || !country) {
+        if (!applicationId || !applicantName || !applicantEmail || !aedAmount || !country || !gateway) {
             showError('Please fill in all required fields');
             return;
         }
         
-        // Convert AED to ZAR for South Africa (PayFast only accepts ZAR)
+        // Convert AED to ZAR for South Africa (both gateways use ZAR)
         let paymentAmount = aedAmount;
         if (country === 'South Africa' && exchangeRates['ZAR']) {
             paymentAmount = aedAmount * exchangeRates['ZAR'];
@@ -126,7 +127,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Get the current domain for backend URL
         const currentDomain = window.location.origin;
-        const backendURL = `${currentDomain}/api/payments/start`;
+        
+        // Choose backend endpoint based on selected gateway
+        const backendURL = gateway === 'paygate' 
+            ? `${currentDomain}/api/paygate/initiate`
+            : `${currentDomain}/api/payments/start`;
         
         try {
             // Stage 2: Calling backend
@@ -160,17 +165,30 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             console.log('Payment initiated:', data);
             
-            if (data.paymentUrl && data.formData) {
-                // Show success modal
-                const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
-                showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
-                
-                // Create and submit POST form to PayFast (required by PayFast)
-                setTimeout(() => {
-                    submitPayFastForm(data.paymentUrl, data.formData);
-                }, 2000);
+            // Handle different gateway response types
+            if (data.gateway === 'paygate') {
+                // PayGate: Direct redirect to payment URL
+                if (data.paymentUrl) {
+                    showSuccessModal('Payment initiated successfully! Redirecting to PayGate...');
+                    setTimeout(() => {
+                        window.location.href = data.paymentUrl;
+                    }, 2000);
+                } else {
+                    throw new Error('No payment URL received from PayGate');
+                }
+            } else if (data.gateway === 'payfast') {
+                // PayFast: Submit POST form
+                if (data.paymentUrl && data.formData) {
+                    const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
+                    showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
+                    setTimeout(() => {
+                        submitPayFastForm(data.paymentUrl, data.formData);
+                    }, 2000);
+                } else {
+                    throw new Error('No payment data received from server');
+                }
             } else {
-                throw new Error('No payment data received from server');
+                throw new Error('Unknown payment gateway');
             }
             
         } catch (error) {
