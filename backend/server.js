@@ -81,6 +81,18 @@ const getIKhokhaConfig = () => {
     };
 };
 
+// Peach Payments configuration
+const getPeachConfig = () => {
+    return {
+        entityId: process.env.PEACH_ENTITY_ID || '',
+        accessToken: process.env.PEACH_ACCESS_TOKEN || '',
+        apiUrl: process.env.PEACH_TEST_MODE !== 'false' 
+            ? 'https://testsecure.peachpayments.com' 
+            : 'https://secure.peachpayments.com',
+        testMode: process.env.PEACH_TEST_MODE !== 'false' // Default to test mode
+    };
+};
+
 // Generate MD5 signature for PayFast
 function generateSignature(data, passphrase = null) {
     // PayFast DOCUMENTED field order for form submissions
@@ -168,6 +180,27 @@ function generatePayGateChecksum(data, encryptionKey) {
     console.log('========================================\n');
     
     return checksum;
+}
+
+// Generate HMAC SHA-256 signature for Peach Payments
+function generatePeachSignature(params, secretToken) {
+    // Sort parameters alphabetically
+    const sortedParams = Object.keys(params)
+        .sort()
+        .map(key => `${key}=${params[key]}`)
+        .join('&');
+    
+    // Generate HMAC SHA-256 signature
+    const signature = crypto.createHmac('sha256', secretToken)
+        .update(sortedParams)
+        .digest('hex');
+    
+    console.log('\n🔐 ===== PEACH SIGNATURE GENERATION =====');
+    console.log('String to sign:', sortedParams);
+    console.log('Generated signature:', signature);
+    console.log('========================================\n');
+    
+    return signature;
 }
 
 // POST /api/payments/start - Initiate PayFast payment
