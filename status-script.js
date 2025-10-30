@@ -1,6 +1,6 @@
 // Initialize Dubai Visa Portal SDK
 const sdk = new DubaiVisaPortalSDK({
-    apiBaseUrl: 'https://workspace.duane16.repl.co',
+    apiBaseUrl: 'https://dubai-visa-ai-duane16.replit.app',
     onError: (error) => {
         console.error('SDK Error:', error);
     },
