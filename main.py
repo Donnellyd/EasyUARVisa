@@ -111,16 +111,15 @@ def start_payment():
         
         payment_data['signature'] = generate_payfast_signature(payment_data, config['passphrase'])
         
-        payment = Payment(
-            reference=reference,
-            application_id=application_id,
-            amount=float(amount),
-            currency='ZAR',
-            email=clean_email,
-            name=applicant_name,
-            country=country,
-            status='pending'
-        )
+        payment = Payment()
+        payment.reference = reference
+        payment.application_id = application_id
+        payment.amount = float(amount)
+        payment.currency = 'ZAR'
+        payment.email = clean_email
+        payment.name = applicant_name
+        payment.country = country
+        payment.status = 'pending'
         
         db.session.add(payment)
         db.session.commit()
@@ -203,7 +202,7 @@ def get_payment_status(reference):
         print(f'❌ Get payment status error: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/payments/paygate/initiate', methods=['POST'])
+@app.route('/api/paygate/initiate', methods=['POST'])
 def initiate_paygate():
     """Initiate PayGate payment"""
     try:
@@ -245,16 +244,15 @@ def initiate_paygate():
         
         initiate_data['CHECKSUM'] = generate_paygate_checksum(initiate_data, config['encryption_key'])
         
-        payment = Payment(
-            reference=reference,
-            application_id=application_id,
-            amount=float(amount),
-            currency='ZAR',
-            email=applicant_email,
-            name=applicant_name,
-            country=country,
-            status='pending'
-        )
+        payment = Payment()
+        payment.reference = reference
+        payment.application_id = application_id
+        payment.amount = float(amount)
+        payment.currency = 'ZAR'
+        payment.email = applicant_email
+        payment.name = applicant_name
+        payment.country = country
+        payment.status = 'pending'
         
         db.session.add(payment)
         db.session.commit()
@@ -264,22 +262,22 @@ def initiate_paygate():
         result = dict(item.split('=') for item in response.text.split('&'))
         
         if result.get('PAY_REQUEST_ID'):
+            payment_url = f"{config['process_url']}?PAY_REQUEST_ID={result['PAY_REQUEST_ID']}"
             return jsonify({
                 'success': True,
-                'payRequestId': result['PAY_REQUEST_ID'],
-                'processUrl': config['process_url'],
+                'paymentUrl': payment_url,
                 'reference': reference,
                 'gateway': 'paygate'
             })
         else:
-            return jsonify({'error': 'PayGate initiation failed'}), 500
+            return jsonify({'error': 'PayGate initiation failed', 'detail': result}), 500
         
     except Exception as e:
         print(f'❌ PayGate initiation error: {str(e)}')
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/payments/peach/checkout', methods=['POST'])
+@app.route('/api/peach/initiate', methods=['POST'])
 def create_peach_checkout():
     """Create Peach Payments checkout"""
     try:
@@ -326,16 +324,15 @@ def create_peach_checkout():
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         
-        payment = Payment(
-            reference=reference,
-            application_id=application_id,
-            amount=float(amount),
-            currency='ZAR',
-            email=applicant_email,
-            name=applicant_name,
-            country=country,
-            status='pending'
-        )
+        payment = Payment()
+        payment.reference = reference
+        payment.application_id = application_id
+        payment.amount = float(amount)
+        payment.currency = 'ZAR'
+        payment.email = applicant_email
+        payment.name = applicant_name
+        payment.country = country
+        payment.status = 'pending'
         
         db.session.add(payment)
         db.session.commit()
@@ -349,8 +346,10 @@ def create_peach_checkout():
         result = response.json()
         
         if result.get('id'):
+            payment_url = f"{config['api_url']}/v1/paymentWidgets.js?checkoutId={result['id']}"
             return jsonify({
                 'success': True,
+                'paymentUrl': payment_url,
                 'checkoutId': result['id'],
                 'reference': reference,
                 'gateway': 'peach',
