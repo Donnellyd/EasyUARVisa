@@ -49,13 +49,7 @@ A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Expr
    - Return URL: `paygate-return.html`
    - Environment variables: `PAYGATE_ID`, `PAYGATE_ENCRYPTION_KEY`
 
-3. **iKhokha** (Test Mode)
-   - REST API integration
-   - Application ID/Secret authentication
-   - Return URL: `ikhokha-return.html`
-   - Environment variables: `IKHOKHA_APPLICATION_ID`, `IKHOKHA_APPLICATION_SECRET`, `IKHOKHA_TEST_MODE`
-
-4. **Peach Payments** (Test Mode) - **NEW**
+3. **Peach Payments** (Test Mode)
    - HMAC SHA-256 signature verification
    - Hosted checkout integration
    - South Africa's leading payment gateway (2.95% card fees, 1.5% Pay by Bank)
@@ -102,7 +96,6 @@ CREATE TABLE payments (
 ## Payment Gateways
 - **PayFast**: Sandbox mode for testing
 - **PayGate**: South African payment gateway
-- **iKhokha**: eCommerce payment gateway with test mode
 - **Peach Payments**: Leading SA gateway with multiple payment methods (cards, wallets, EFT)
 
 ## Backend Services
@@ -119,11 +112,6 @@ CREATE TABLE payments (
 ### PayGate
 - `PAYGATE_ID`
 - `PAYGATE_ENCRYPTION_KEY`
-
-### iKhokha
-- `IKHOKHA_APPLICATION_ID`
-- `IKHOKHA_APPLICATION_SECRET`
-- `IKHOKHA_TEST_MODE`
 
 ### Peach Payments
 - `PEACH_ENTITY_ID`
