@@ -132,8 +132,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         let backendURL;
         if (gateway === 'paygate') {
             backendURL = `${currentDomain}/api/paygate/initiate`;
-        } else if (gateway === 'ikhokha') {
-            backendURL = `${currentDomain}/api/ikhokha/initiate`;
         } else if (gateway === 'peach') {
             backendURL = `${currentDomain}/api/peach/initiate`;
         } else {
@@ -182,17 +180,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }, 2000);
                 } else {
                     throw new Error('No payment URL received from PayGate');
-                }
-            } else if (data.gateway === 'ikhokha') {
-                // iKhokha: Direct redirect to payment URL
-                if (data.paymentUrl) {
-                    const testNote = data.testMode ? ' (Test Mode)' : '';
-                    showSuccessModal(`Payment initiated successfully!${testNote} Redirecting to iKhokha...`);
-                    setTimeout(() => {
-                        window.location.href = data.paymentUrl;
-                    }, 2000);
-                } else {
-                    throw new Error('No payment URL received from iKhokha');
                 }
             } else if (data.gateway === 'peach') {
                 // Peach Payments: Direct redirect to payment URL
