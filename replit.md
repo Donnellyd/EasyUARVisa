@@ -1,6 +1,6 @@
 # Overview
 
-UAE VISA is a Flask-based web application serving as the official UAE visa application portal. It provides a comprehensive platform for visa applications, status tracking, and information display, designed with a professional aesthetic incorporating UAE national colors. The project aims to offer a seamless and secure visa application experience, leveraging a Node.js backend for robust payment processing via PayFast.
+UAE VISA is a Flask-based web application serving as the official UAE visa application portal. It provides a comprehensive platform for visa applications, status tracking, and information display, designed with a professional aesthetic incorporating UAE national colors. The project integrates with the **dubai-visa-ai** backend (`https://dubai-visa-ai-duane16.replit.app`) for application processing and tracking, while using a local Node.js backend for robust payment processing via multiple gateways (PayFast, PayGate, Peach Payments).
 
 # User Preferences
 
@@ -21,7 +21,7 @@ The design adheres strictly to a UAE national color palette (red, green, white, 
 The project maintains a clear separation of concerns with HTML, CSS, and JavaScript files organized into distinct modules. Asset management utilizes CDNs for external fonts (Google Fonts) and icons (Font Awesome).
 
 ## Backend Integration
-The application integrates with a backend portal for application submission, status tracking, and document uploads. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality.
+The application integrates with the **dubai-visa-ai** backend at `https://dubai-visa-ai-duane16.replit.app` for application submission, status tracking, and document uploads via the Dubai Visa Portal SDK. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality. A separate Node.js backend (port 3000) handles payment gateway integrations independently.
 
 ## Payment Integration
 Payment processing is a core feature supporting **multiple payment gateways** for South African visa applicants. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
