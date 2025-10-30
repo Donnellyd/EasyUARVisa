@@ -5,8 +5,8 @@ channel = "stable-25_05"
 packages = ["openssl", "postgresql"]
 
 [deployment]
-deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+deploymentTarget = "vm"
+run = ["bash", "start.sh"]
 
 [workflows]
 runButton = "Project"
