@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 const getPayFastConfig = () => {
     // Use sandbox credentials for testing
     // User will replace these with their own credentials later
-    return {
+    const config = {
         merchantId: process.env.PAYFAST_MERCHANT_ID || '10000100',
         merchantKey: process.env.PAYFAST_MERCHANT_KEY || '46f0cd694581a',
         passphrase: process.env.PAYFAST_PASSPHRASE || 'jt7NOE43FZPn',
@@ -59,6 +59,11 @@ const getPayFastConfig = () => {
             ? 'https://sandbox.payfast.co.za/eng/process' 
             : 'https://www.payfast.co.za/eng/process'
     };
+    console.log('🔑 PayFast Config Loaded:');
+    console.log(`   Merchant ID: ${config.merchantId}`);
+    console.log(`   Merchant Key: ${config.merchantKey.substring(0, 5)}...`);
+    console.log(`   Passphrase: ${config.passphrase.substring(0, 5)}...`);
+    return config;
 };
 
 // PayGate configuration
