@@ -172,14 +172,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             // Handle different gateway response types
             if (data.gateway === 'paygate') {
-                // PayGate: Direct redirect to payment URL
-                if (data.paymentUrl) {
-                    showSuccessModal('Payment initiated successfully! Redirecting to PayGate...');
+                // PayGate: Submit POST form (uses PayFast sandbox infrastructure)
+                if (data.paymentUrl && data.formData) {
+                    const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
+                    showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayGate...`);
                     setTimeout(() => {
-                        window.location.href = data.paymentUrl;
+                        submitPayFastForm(data.paymentUrl, data.formData);
                     }, 2000);
                 } else {
-                    throw new Error('No payment URL received from PayGate');
+                    throw new Error('No payment data received from PayGate');
                 }
             } else if (data.gateway === 'peach') {
                 // Peach Payments: Direct redirect to payment URL
