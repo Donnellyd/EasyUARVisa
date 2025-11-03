@@ -38,20 +38,16 @@ All payment gateway integrations are implemented directly in the Flask applicati
 ### Supported Payment Gateways
 
 1. **PayFast** (Sandbox Mode)
-   - MD5 signature verification using URL-encoded values and lowercase (per PayFast official docs)
-   - POST form submission to PayFast (form data uses raw values, browser handles encoding)
+   - MD5 signature verification using PayFast's documented field order
+   - POST form submission to PayFast
    - Return URL: `payment-success.html`
-   - Signature calculation: URL-encode all values, convert to lowercase, then MD5 hash
    - Environment variables: `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, `PAYFAST_SANDBOX`
 
-2. **PayGate** (Sandbox Mode - Uses PayFast Infrastructure)
-   - MD5 signature verification using URL-encoded values and lowercase (same format as PayFast)
-   - POST form submission to PayFast sandbox with PayGate credentials
-   - Separate merchant account (different credentials than PayFast)
+2. **PayGate**
+   - MD5 checksum validation
+   - Redirect-based flow
    - Return URL: `paygate-return.html`
-   - Notify URL: `/api/paygate/verify`
-   - Signature calculation: URL-encode all values, convert to lowercase, then MD5 hash
-   - Environment variables: `PAYGATE_ID` (merchant ID), `PAYGATE_MERCHANT_KEY`, `PAYGATE_ENCRYPTION_KEY` (salt passphrase), `PAYGATE_SANDBOX`
+   - Environment variables: `PAYGATE_ID`, `PAYGATE_ENCRYPTION_KEY`
 
 3. **Peach Payments** (Test Mode)
    - HMAC SHA-256 signature verification
@@ -115,11 +111,9 @@ CREATE TABLE payments (
 - `PAYFAST_PASSPHRASE`
 - `PAYFAST_SANDBOX`
 
-### PayGate (Uses PayFast Sandbox)
-- `PAYGATE_ID` (Merchant ID: 10043233)
-- `PAYGATE_MERCHANT_KEY` (Merchant Key: ldt9a8d3l0dhe)
-- `PAYGATE_ENCRYPTION_KEY` (Salt Passphrase: Paygatetest7456)
-- `PAYGATE_SANDBOX` (Set to 'true' for sandbox mode)
+### PayGate
+- `PAYGATE_ID`
+- `PAYGATE_ENCRYPTION_KEY`
 
 ### Peach Payments
 - `PEACH_ENTITY_ID`

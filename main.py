@@ -3,7 +3,7 @@ from app import app, db
 from models import Payment
 from payment_utils import (
     get_payfast_config, get_paygate_config, get_peach_config,
-    generate_payfast_signature, generate_paygate_signature, generate_peach_signature
+    generate_payfast_signature, generate_paygate_checksum, generate_peach_signature
 )
 import os
 import requests
@@ -204,7 +204,7 @@ def get_payment_status(reference):
 
 @app.route('/api/paygate/initiate', methods=['POST'])
 def initiate_paygate():
-    """Initiate PayGate payment (uses PayFast sandbox infrastructure)"""
+    """Initiate PayGate payment"""
     try:
         data = request.get_json()
         print(f'💳 PayGate request received: {data}')
@@ -214,19 +214,11 @@ def initiate_paygate():
         applicant_email = data.get('applicant_email')
         amount = data.get('amount')
         country = data.get('country', 'Unknown')
-        description = data.get('description', 'UAE Visa Application Fee')
         
         if not all([application_id, applicant_name, applicant_email, amount]):
             return jsonify({'error': 'Missing required fields'}), 400
         
-        clean_name = applicant_name.strip()
-        clean_email = applicant_email.strip()
-        
-        name_parts = [p for p in clean_name.split() if p]
-        first_name = name_parts[0] if name_parts else clean_name
-        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else clean_name
-        
-        reference = f"UAE-PAYGATE-{int(datetime.now().timestamp() * 1000)}"
+        reference = f"UAE-PAY-{int(datetime.now().timestamp() * 1000)}"
         
         config = get_paygate_config()
         
@@ -236,31 +228,28 @@ def initiate_paygate():
         else:
             app_base_url = 'http://localhost:5000'
         
-        payment_data = {
-            'merchant_id': config['merchant_id'],
-            'merchant_key': config['merchant_key'],
-            'name_first': first_name,
-            'name_last': last_name,
-            'email_address': clean_email,
-            'm_payment_id': reference,
-            'amount': f"{float(amount):.2f}",
-            'item_name': description,
-            'item_description': f"{description} - {application_id}",
-            'return_url': f"{app_base_url}/paygate-return.html?ref={reference}",
-            'cancel_url': f"{app_base_url}/payment.html?ref={application_id}&name={applicant_name}&email={applicant_email}&amount={amount}",
-            'notify_url': f"{app_base_url}/api/paygate/verify",
-            'custom_str1': application_id,
-            'custom_str2': country
+        amount_cents = int(float(amount) * 100)
+        
+        initiate_data = {
+            'PAYGATE_ID': config['paygate_id'],
+            'REFERENCE': reference,
+            'AMOUNT': str(amount_cents),
+            'CURRENCY': 'ZAR',
+            'RETURN_URL': f"{app_base_url}/paygate-return.html",
+            'TRANSACTION_DATE': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'LOCALE': 'en-za',
+            'COUNTRY': 'ZAF',
+            'EMAIL': applicant_email
         }
         
-        payment_data['signature'] = generate_paygate_signature(payment_data, config['passphrase'])
+        initiate_data['CHECKSUM'] = generate_paygate_checksum(initiate_data, config['encryption_key'])
         
         payment = Payment()
         payment.reference = reference
         payment.application_id = application_id
         payment.amount = float(amount)
         payment.currency = 'ZAR'
-        payment.email = clean_email
+        payment.email = applicant_email
         payment.name = applicant_name
         payment.country = country
         payment.status = 'pending'
@@ -268,65 +257,25 @@ def initiate_paygate():
         db.session.add(payment)
         db.session.commit()
         
-        print(f'✅ PayGate payment initiated: {reference}')
+        response = requests.post(config['initiate_url'], data=initiate_data)
         
-        return jsonify({
-            'success': True,
-            'paymentUrl': config['base_url'],
-            'formData': payment_data,
-            'reference': reference,
-            'gateway': 'paygate',
-            'sandbox': config['sandbox']
-        })
+        result = dict(item.split('=') for item in response.text.split('&'))
+        
+        if result.get('PAY_REQUEST_ID'):
+            payment_url = f"{config['process_url']}?PAY_REQUEST_ID={result['PAY_REQUEST_ID']}"
+            return jsonify({
+                'success': True,
+                'paymentUrl': payment_url,
+                'reference': reference,
+                'gateway': 'paygate'
+            })
+        else:
+            return jsonify({'error': 'PayGate initiation failed', 'detail': result}), 500
         
     except Exception as e:
         print(f'❌ PayGate initiation error: {str(e)}')
         db.session.rollback()
-        return jsonify({'error': 'Failed to initiate PayGate payment', 'detail': str(e)}), 500
-
-@app.route('/api/paygate/verify', methods=['POST'])
-def verify_paygate():
-    """PayGate ITN (Instant Transaction Notification) - same format as PayFast"""
-    try:
-        print('📡 PayGate verification callback received')
-        data = request.form.to_dict()
-        print(f'Body: {data}')
-        
-        config = get_paygate_config()
-        
-        received_signature = data.pop('signature', None)
-        calculated_signature = generate_paygate_signature(data, config['passphrase'])
-        
-        if received_signature != calculated_signature:
-            print('❌ Invalid signature')
-            return 'Invalid signature', 400
-        
-        reference = data.get('m_payment_id')
-        payment_status = data.get('payment_status')
-        payment_id = data.get('pf_payment_id')
-        
-        status = 'pending'
-        if payment_status == 'COMPLETE':
-            status = 'paid'
-        elif payment_status == 'FAILED':
-            status = 'failed'
-        elif payment_status == 'CANCELLED':
-            status = 'cancelled'
-        
-        payment = Payment.query.filter_by(reference=reference).first()
-        if payment:
-            payment.status = status
-            payment.payment_id = payment_id
-            payment.updated_at = datetime.utcnow()
-            db.session.commit()
-            print(f'✅ PayGate payment updated: {reference} -> {status}')
-        
-        return 'OK', 200
-        
-    except Exception as e:
-        print(f'❌ PayGate verification error: {str(e)}')
-        db.session.rollback()
-        return 'Error', 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/peach/initiate', methods=['POST'])
 def create_peach_checkout():

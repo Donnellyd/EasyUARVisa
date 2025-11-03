@@ -15,14 +15,12 @@ def get_payfast_config():
     return config
 
 def get_paygate_config():
-    """Get PayGate configuration from environment (uses PayFast sandbox infrastructure)"""
-    sandbox = os.environ.get('PAYGATE_SANDBOX', 'true').lower() != 'false'
+    """Get PayGate configuration from environment"""
     return {
-        'merchant_id': os.environ.get('PAYGATE_ID', '10043233'),
-        'merchant_key': os.environ.get('PAYGATE_MERCHANT_KEY', 'ldt9a8d3l0dhe'),
-        'passphrase': os.environ.get('PAYGATE_ENCRYPTION_KEY', 'Paygatetest7456'),
-        'sandbox': sandbox,
-        'base_url': 'https://sandbox.payfast.co.za/eng/process' if sandbox else 'https://www.payfast.co.za/eng/process'
+        'paygate_id': os.environ.get('PAYGATE_ID', '10011072130'),
+        'encryption_key': os.environ.get('PAYGATE_ENCRYPTION_KEY', 'secret'),
+        'initiate_url': 'https://secure.paygate.co.za/payweb3/initiate.trans',
+        'process_url': 'https://secure.paygate.co.za/payweb3/process.trans'
     }
 
 def get_peach_config():
@@ -36,7 +34,7 @@ def get_peach_config():
     }
 
 def generate_payfast_signature(data, passphrase=None):
-    """Generate MD5 signature for PayFast - URL-encoded values, lowercase (per PayFast docs)"""
+    """Generate MD5 signature for PayFast using documented field order"""
     field_order = [
         'merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url',
         'name_first', 'name_last', 'email_address', 'cell_number',
@@ -50,53 +48,29 @@ def generate_payfast_signature(data, passphrase=None):
     params = []
     for key in field_order:
         if key in data and data[key] not in [None, '']:
-            value = str(data[key]).strip().lower()
-            # URL encode the value as per PayFast documentation
+            value = str(data[key]).strip()
             encoded_value = urllib.parse.quote_plus(value)
             params.append(f"{key}={encoded_value}")
     
     param_string = '&'.join(params)
     
     if passphrase:
-        # Add passphrase (lowercase and URL-encoded)
-        encoded_passphrase = urllib.parse.quote_plus(passphrase.strip().lower())
+        encoded_passphrase = urllib.parse.quote_plus(passphrase.strip())
         param_string += f"&passphrase={encoded_passphrase}"
     
     signature = hashlib.md5(param_string.encode()).hexdigest()
     print(f"🔐 PayFast Signature: {signature}")
     return signature
 
-def generate_paygate_signature(data, passphrase=None):
-    """Generate MD5 signature for PayGate - URL-encoded values, lowercase (same as PayFast)"""
-    # PayGate uses same field order as PayFast
-    field_order = [
-        'merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url',
-        'name_first', 'name_last', 'email_address', 'cell_number',
-        'm_payment_id', 'amount', 'item_name', 'item_description',
-        'custom_int1', 'custom_int2', 'custom_int3', 'custom_int4', 'custom_int5',
-        'custom_str1', 'custom_str2', 'custom_str3', 'custom_str4', 'custom_str5',
-        'email_confirmation', 'confirmation_address', 'payment_method',
-        'subscription_type', 'billing_date', 'recurring_amount', 'frequency', 'cycles'
-    ]
+def generate_paygate_checksum(data, encryption_key):
+    """Generate MD5 checksum for PayGate"""
+    sorted_keys = sorted(data.keys())
+    values = ''.join(str(data[key]) for key in sorted_keys)
+    checksum_string = values + encryption_key
     
-    params = []
-    for key in field_order:
-        if key in data and data[key] not in [None, '']:
-            value = str(data[key]).strip().lower()
-            # URL encode the value as per PayFast documentation
-            encoded_value = urllib.parse.quote_plus(value)
-            params.append(f"{key}={encoded_value}")
-    
-    param_string = '&'.join(params)
-    
-    if passphrase:
-        # Add passphrase (lowercase and URL-encoded)
-        encoded_passphrase = urllib.parse.quote_plus(passphrase.strip().lower())
-        param_string += f"&passphrase={encoded_passphrase}"
-    
-    signature = hashlib.md5(param_string.encode()).hexdigest()
-    print(f"🔐 PayGate Signature: {signature}")
-    return signature
+    checksum = hashlib.md5(checksum_string.encode()).hexdigest()
+    print(f"🔐 PayGate Checksum: {checksum}")
+    return checksum
 
 def generate_peach_signature(params, secret_token):
     """Generate HMAC SHA-256 signature for Peach Payments"""
