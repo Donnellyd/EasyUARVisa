@@ -63,12 +63,25 @@ def generate_payfast_signature(data, passphrase=None):
     return signature
 
 def generate_paygate_checksum(data, encryption_key):
-    """Generate MD5 checksum for PayGate"""
-    sorted_keys = sorted(data.keys())
-    values = ''.join(str(data[key]) for key in sorted_keys)
-    checksum_string = values + encryption_key
+    """Generate MD5 checksum for PayGate using exact field order"""
+    # PayGate requires fields in this EXACT order
+    field_order = [
+        'PAYGATE_ID', 'REFERENCE', 'AMOUNT', 'CURRENCY', 'RETURN_URL',
+        'TRANSACTION_DATE', 'LOCALE', 'COUNTRY', 'EMAIL',
+        'PAY_METHOD', 'PAY_METHOD_DETAIL', 'NOTIFY_URL',
+        'USER1', 'USER2', 'USER3', 'VAULT', 'VAULT_ID'
+    ]
     
+    # Concatenate values in order, skipping empty/null values
+    values = []
+    for key in field_order:
+        if key in data and data[key] not in [None, '']:
+            values.append(str(data[key]))
+    
+    checksum_string = ''.join(values) + encryption_key
     checksum = hashlib.md5(checksum_string.encode()).hexdigest()
+    
+    print(f"🔐 PayGate Checksum String: {''.join(values)}[KEY]")
     print(f"🔐 PayGate Checksum: {checksum}")
     return checksum
 
