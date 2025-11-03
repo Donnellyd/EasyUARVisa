@@ -38,17 +38,19 @@ All payment gateway integrations are implemented directly in the Flask applicati
 ### Supported Payment Gateways
 
 1. **PayFast** (Sandbox Mode)
-   - MD5 signature verification using PayFast's documented field order
+   - MD5 signature verification using PayFast's documented field order with RAW values (no URL encoding)
    - POST form submission to PayFast
    - Return URL: `payment-success.html`
+   - Cancel URL parameters: URL-encoded to handle special characters (spaces, @, etc.)
    - Environment variables: `PAYFAST_MERCHANT_ID`, `PAYFAST_MERCHANT_KEY`, `PAYFAST_PASSPHRASE`, `PAYFAST_SANDBOX`
 
 2. **PayGate** (Sandbox Mode - Uses PayFast Infrastructure)
-   - MD5 signature verification (same format as PayFast since PayFast owns PayGate)
+   - MD5 signature verification using RAW values (same format as PayFast since PayFast owns PayGate)
    - POST form submission to PayFast sandbox with PayGate credentials
    - Separate merchant account (different credentials than PayFast)
    - Return URL: `paygate-return.html`
    - Notify URL: `/api/paygate/verify`
+   - Cancel URL parameters: URL-encoded to handle special characters (spaces, @, etc.)
    - Environment variables: `PAYGATE_ID` (merchant ID), `PAYGATE_MERCHANT_KEY`, `PAYGATE_ENCRYPTION_KEY` (salt passphrase), `PAYGATE_SANDBOX`
 
 3. **Peach Payments** (Test Mode)
