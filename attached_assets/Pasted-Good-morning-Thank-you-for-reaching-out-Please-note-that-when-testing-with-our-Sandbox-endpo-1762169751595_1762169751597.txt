@@ -1,0 +1,112 @@
+Good morning,
+
+Thank you for reaching out.
+
+Please note that when testing with our Sandbox endpoint, you’ll need to create your own Sandbox credentials. You can do so by registering a Sandbox account using any email of your choice via the following link: https://sandbox.payfast.co.za/
+
+Kindly bear in mind that in both Sandbox and Production environments, you should not include the same email address used to register your Payfast account or the one used to set up your Sandbox account in the payload. Doing so will result in an error.
+
+For example, if you’ve registered your Sandbox account using DanielTheMan@gmail.com, please avoid referencing that same email in your payload.
+
+You can find more details about our custom integration in our Developer Documentation: https://developers.payfast.co.za/docs
+
+Below, you'll find working examples for:
+
+Once-off transactions
+Subscription-based transactions
+Tokenization
+
+Please note: When performing the signature calculation, ensure that both the email address and URLs are properly encoded.
+
+Credentials
+Merchant = 10033543
+Merchant key = 34xw0ot2cjz69
+Passphrase = Swf7w0rd15753
+ 
+Test with signature
+<form action="https://sandbox.payfast.co.za/eng/process" method="post">
+<input type="hidden" name="merchant_id" value="10033543">
+<input type="hidden" name="merchant_key" value="34xw0ot2cjz69">
+<input type="hidden" name="return_url" value="https://www.theugatour.com">
+<input type="hidden" name="cancel_url" value="https://www.theugatour.com">
+<input type="hidden" name="notify_url" value="https://us-central1-uga-tour.cloudfunctions.net/payfastWebhookReceiver">
+<input type="hidden" name="name_first" value="UGA">
+<input type="hidden" name="name_last" value="Admin">
+<input type="hidden" name="email_address" value="admin@theugatour.com">
+<input type="hidden" name="amount" value="10.00">
+<input type="hidden" name="item_name" value="SimplyAtest">
+<input type="hidden" name="item_description" value="WeTestingCustomIntegration">
+<input type="hidden" name="signature" value="c6040f6ba70c6e856e7e5861362a8fe6">
+<input type="submit">
+</form>
+ 
+String used to calculate the signature
+
+merchant_id=10033543&merchant_key=34xw0ot2cjz69&return_url=https%3A%2F%2F[http://www.theugatour.com&cancel_url=https:%2F%2Fwww.theugatour.com&notify_url=https:%2F%2Fus-central1-uga-tour.cloudfunctions.net%2Fpayfastwebhookreceiver&name_first=uga&name_last=admin&email_address=admin%40theugatour.com&amount=10.00&item_name=subscription&item_description=subscription2&passphrase=swf7w0rd15753/]www.theugatour.com&cancel_url=https%3A%2F%2Fwww.theugatour.com&notify_url=https%3A%2F%2Fus-central1-uga-tour.cloudfunctions.net%2FpayfastWebhookReceiver&name_first=UGA&name_last=Admin&email_address=admin%40theugatour.com&amount=10.00&item_name=SimplyAtest&item_description=WeTestingCustomIntegration&passphrase=Swf7w0rd15753
+ 
+
+1. Subscriptions
+
+- The initial transaction undergoes the 3D secure authentication process.
+- The payload sent to our endpoint specifies the cycles, frequency, and recurring amount.
+- Upon the transaction's success, the token is received via your notify URL/callback URL.
+- Our server automatically processes subscriptions based on the initial payload, including cycles, frequency, recurring amount, and the specified run date.
+- You can update the subscription to adjust the run date, amount, or frequency.
+- Subscriptions can be canceled either through your Payfast dashboard or via API.
+
+2. Tokenization
+
+- The initial transaction also undergoes 3D secure authentication.
+- Upon transaction success, your notify URL/callback URL will receive the token.
+- You can use the token on demand, specifying the amount and date of your choice.
+- We expect a payload from your server to charge the token, as this process is not automated from our end.
+
+Subscription
+
+<form action="https://sandbox.payfast.co.za/eng/process"method="post">
+<input type="hidden" name="merchant_id" value="10027290">
+<input type="hidden" name="merchant_key" value="3q87nddvi7d0j">
+<input type="hidden" name="return_url" value="https://eow5fvu0arbsmau.m.pipedream.net">
+<input type="hidden" name="cancel_url" value="https://eow5fvu0arbsmau.m.pipedream.net">
+<input type="hidden" name="notify_url" value="https://eow5fvu0arbsmau.m.pipedream.net">
+<input type="hidden" name="name_first" value="UGA">
+<input type="hidden" name="name_last" value="Admin">
+<input type="hidden" name="email_address" value="faghmeea@payfast.io">
+<input type="hidden" name="amount" value="10.00">
+<input type="hidden" name="item_name" value="Subscription">
+<input type="hidden" name="item_description" value="Subscription1">
+<input type="hidden" name="subscription_type" value="1">
+<input type="hidden" name="frequency" value="3">
+<input type="hidden" name="cycles" value="12">
+<input type="hidden" name="subscription_notify_email" value="true">
+<input type="hidden" name="subscription_notify_webhook" value="true">
+<input type="hidden" name="signature" value="05b939e5b0113fe1e1df2ad6e4ac6968">
+<input type="submit">
+</form>
+ 
+Signature string
+ 
+merchant_id=10027290&merchant_key=3q87nddvi7d0j&return_url=https%3A%2F%2Feow5fvu0arbsmau.m.pipedream.net&cancel_url=https%3A%2F%2Feow5fvu0arbsmau.m.pipedream.net&notify_url=https%3A%2F%2Feow5fvu0arbsmau.m.pipedream.net&name_first=UGA&name_last=Admin&email_address=faghmeea%40payfast.io&amount=10.00&item_name=Subscription&item_description=Subscription1&subscription_type=1&frequency=3&cycles=12&subscription_notify_email=true&subscription_notify_webhook=true&passphrase=Swf7w0rd15753
+
+Tokenization.
+
+form action="https://sandbox.payfast.co.za/eng/process" method="post">
+<input type="hidden" name="merchant_id" value="10033543">
+<input type="hidden" name="merchant_key" value="34xw0ot2cjz69">
+<input type="hidden" name="return_url" value="https://www.theugatour.com">
+<input type="hidden" name="cancel_url" value="https://www.theugatour.com">
+<input type="hidden" name="notify_url" value="https://us-central1-uga-tour.cloudfunctions.net/payfastWebhookReceiver">
+<input type="hidden" name="name_first" value="UGA">
+<input type="hidden" name="name_last" value="Admin">
+<input type="hidden" name="email_address" value="admin@theugatour.com">
+<input type="hidden" name="amount" value="10.00">
+<input type="hidden" name="item_name" value="Subscription">
+<input type="hidden" name="item_description" value="Subscription2">
+<input type="hidden" name="subscription_type" value="2">
+<input type="hidden" name="signature" value="8755062d5ca4d915feb9686428690842">
+<input type="submit">
+</form> 
+ 
+String used to calculate the signature:
+
+merchant_id=10033543&merchant_key=34xw0ot2cjz69&return_url=https%3A%2F%2F[[http://www.theugatour.com&cancel_url=https:%2F%2Fwww.theugatour.com&notify_url=https:%2F%2Fus-central1-uga-tour.cloudfunctions.net%2Fpayfastwebhookreceiver&name_first=uga&name_last=admin&email_address=admin%40theugatour.com&amount=10.00&item_name=subscription&item_description=subscription2&subscription_type=2&passphrase=swf7w0rd15753/%5dwww.theugatour.com&cancel_url=https%3A%2F%2Fwww.theugatour.com&notify_url=https%3A%2F%2Fus-central1-uga-tour.cloudfunctions.net%2FpayfastWebhookReceiver&name_first=UGA&name_last=Admin&email_address=admin%40theugatour.com&amount=10.00&item_name=Subscription&item_description=Subscription2&subscription_type=2&passphrase=Swf7w0rd15753]http://www.theugatour.com&cancel_url=https:%2F%2Fwww.theugatour.com&notify_url=https:%2F%2Fus-central1-uga-tour.cloudfunctions.net%2Fpayfastwebhookreceiver&name_first=uga&name_last=admin&email_address=admin%40theugatour.com&amount=10.00&item_name=subscription&item_description=subscription2&subscription_type=2&passphrase=swf7w0rd15753/]www.theugatour.com&cancel_url=https%3A%2F%2Fwww.theugatour.com&notify_url=https%3A%2F%2Fus-central1-uga-tour.cloudfunctions.net%2FpayfastWebhookReceiver&name_first=UGA&name_last=Admin&email_address=admin%40theugatour.com&amount=10.00&item_name=Subscription&item_description=Subscription2&subscription_type=2&passphrase=Swf7w0rd15753
