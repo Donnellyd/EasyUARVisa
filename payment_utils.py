@@ -36,7 +36,7 @@ def get_peach_config():
     }
 
 def generate_payfast_signature(data, passphrase=None):
-    """Generate MD5 signature for PayFast using documented field order"""
+    """Generate MD5 signature for PayFast using documented field order - RAW VALUES, NO URL ENCODING"""
     field_order = [
         'merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url',
         'name_first', 'name_last', 'email_address', 'cell_number',
@@ -51,14 +51,14 @@ def generate_payfast_signature(data, passphrase=None):
     for key in field_order:
         if key in data and data[key] not in [None, '']:
             value = str(data[key]).strip()
-            encoded_value = urllib.parse.quote_plus(value)
-            params.append(f"{key}={encoded_value}")
+            # Use RAW values for PayFast signature - DO NOT URL encode
+            params.append(f"{key}={value}")
     
     param_string = '&'.join(params)
     
     if passphrase:
-        encoded_passphrase = urllib.parse.quote_plus(passphrase.strip())
-        param_string += f"&passphrase={encoded_passphrase}"
+        # Add passphrase as raw value
+        param_string += f"&passphrase={passphrase.strip()}"
     
     signature = hashlib.md5(param_string.encode()).hexdigest()
     print(f"🔐 PayFast Signature: {signature}")
