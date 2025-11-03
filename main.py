@@ -257,7 +257,11 @@ def initiate_paygate():
         db.session.add(payment)
         db.session.commit()
         
+        print(f'📤 Sending to PayGate: {initiate_data}')
         response = requests.post(config['initiate_url'], data=initiate_data)
+        
+        print(f'📥 PayGate Response Status: {response.status_code}')
+        print(f'📥 PayGate Response Text: {response.text}')
         
         result = dict(item.split('=') for item in response.text.split('&'))
         
