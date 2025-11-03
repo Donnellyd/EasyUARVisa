@@ -15,12 +15,14 @@ def get_payfast_config():
     return config
 
 def get_paygate_config():
-    """Get PayGate configuration from environment"""
+    """Get PayGate configuration from environment (uses PayFast sandbox infrastructure)"""
+    sandbox = os.environ.get('PAYGATE_SANDBOX', 'true').lower() != 'false'
     return {
-        'paygate_id': os.environ.get('PAYGATE_ID', '10011072130'),
-        'encryption_key': os.environ.get('PAYGATE_ENCRYPTION_KEY', 'secret'),
-        'initiate_url': 'https://secure.paygate.co.za/payweb3/initiate.trans',
-        'process_url': 'https://secure.paygate.co.za/payweb3/process.trans'
+        'merchant_id': os.environ.get('PAYGATE_ID', '10043233'),
+        'merchant_key': os.environ.get('PAYGATE_MERCHANT_KEY', 'ldt9a8d3l0dhe'),
+        'passphrase': os.environ.get('PAYGATE_ENCRYPTION_KEY', 'Paygatetest7456'),
+        'sandbox': sandbox,
+        'base_url': 'https://sandbox.payfast.co.za/eng/process' if sandbox else 'https://www.payfast.co.za/eng/process'
     }
 
 def get_peach_config():
@@ -62,28 +64,35 @@ def generate_payfast_signature(data, passphrase=None):
     print(f"🔐 PayFast Signature: {signature}")
     return signature
 
-def generate_paygate_checksum(data, encryption_key):
-    """Generate MD5 checksum for PayGate using exact field order"""
-    # PayGate requires fields in this EXACT order
+def generate_paygate_signature(data, passphrase=None):
+    """Generate MD5 signature for PayGate (uses PayFast format since same sandbox)"""
+    # PayGate uses same field order as PayFast
     field_order = [
-        'PAYGATE_ID', 'REFERENCE', 'AMOUNT', 'CURRENCY', 'RETURN_URL',
-        'TRANSACTION_DATE', 'LOCALE', 'COUNTRY', 'EMAIL',
-        'PAY_METHOD', 'PAY_METHOD_DETAIL', 'NOTIFY_URL',
-        'USER1', 'USER2', 'USER3', 'VAULT', 'VAULT_ID'
+        'merchant_id', 'merchant_key', 'return_url', 'cancel_url', 'notify_url',
+        'name_first', 'name_last', 'email_address', 'cell_number',
+        'm_payment_id', 'amount', 'item_name', 'item_description',
+        'custom_int1', 'custom_int2', 'custom_int3', 'custom_int4', 'custom_int5',
+        'custom_str1', 'custom_str2', 'custom_str3', 'custom_str4', 'custom_str5',
+        'email_confirmation', 'confirmation_address', 'payment_method',
+        'subscription_type', 'billing_date', 'recurring_amount', 'frequency', 'cycles'
     ]
     
-    # Concatenate values in order, skipping empty/null values
-    values = []
+    params = []
     for key in field_order:
         if key in data and data[key] not in [None, '']:
-            values.append(str(data[key]))
+            value = str(data[key]).strip()
+            encoded_value = urllib.parse.quote_plus(value)
+            params.append(f"{key}={encoded_value}")
     
-    checksum_string = ''.join(values) + encryption_key
-    checksum = hashlib.md5(checksum_string.encode()).hexdigest()
+    param_string = '&'.join(params)
     
-    print(f"🔐 PayGate Checksum String: {''.join(values)}[KEY]")
-    print(f"🔐 PayGate Checksum: {checksum}")
-    return checksum
+    if passphrase:
+        encoded_passphrase = urllib.parse.quote_plus(passphrase.strip())
+        param_string += f"&passphrase={encoded_passphrase}"
+    
+    signature = hashlib.md5(param_string.encode()).hexdigest()
+    print(f"🔐 PayGate Signature: {signature}")
+    return signature
 
 def generate_peach_signature(params, secret_token):
     """Generate HMAC SHA-256 signature for Peach Payments"""
