@@ -196,7 +196,7 @@ app.post('/api/payments/start', async (req, res) => {
             item_description: `${description} - ${application_id}`,
             
             // URLs for callbacks
-            return_url: `${appBaseUrl}/payment-success.html?ref=${reference}`,
+            return_url: `${appBaseUrl}/payment-success.html?ref=${reference}&application_id=${application_id}`,
             cancel_url: `${appBaseUrl}/payment.html?ref=${application_id}&name=${encodeURIComponent(applicant_name)}&email=${encodeURIComponent(applicant_email)}&amount=${amount}`,
             notify_url: `${appBaseUrl}/api/payments/verify`,
             

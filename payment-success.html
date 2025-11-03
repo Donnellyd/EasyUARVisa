@@ -74,18 +74,61 @@
         </div>
     </footer>
 
+    <script src="static/visa-portal-sdk.js"></script>
     <script>
+        // Initialize SDK
+        const sdk = new DubaiVisaPortalSDK({
+            apiBaseUrl: 'https://workspace.duane16.repl.co',
+            onError: (error) => console.error('SDK Error:', error),
+            onSuccess: (message) => console.log('SDK Success:', message)
+        });
+        
         // Get payment reference from URL
         const urlParams = new URLSearchParams(window.location.search);
         const reference = urlParams.get('ref');
+        const applicationId = urlParams.get('application_id');
         
         if (reference) {
             document.getElementById('paymentReference').textContent = reference;
             
             // Clear any pending payment from localStorage
             localStorage.removeItem('pendingPayment_' + reference);
+            
+            // Notify backend of successful payment (if we have application ID)
+            if (applicationId) {
+                notifyBackendOfPayment(applicationId, reference);
+            }
         } else {
             document.getElementById('paymentReference').textContent = 'Not available';
+        }
+        
+        async function notifyBackendOfPayment(applicationId, paymentReference) {
+            try {
+                console.log('Notifying backend of successful payment:', {applicationId, paymentReference});
+                
+                // The backend should update application status when it receives payment webhook
+                // This is just a redundant check/update
+                const response = await fetch(`${sdk.apiBaseUrl}/api/website/applications/${applicationId}/payment`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentReference: paymentReference,
+                        status: 'paid',
+                        paidAt: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('Backend notified of payment successfully');
+                } else {
+                    console.warn('Failed to notify backend of payment (non-critical)');
+                }
+            } catch (error) {
+                console.warn('Could not notify backend of payment (non-critical):', error);
+            }
         }
     </script>
 </body>
