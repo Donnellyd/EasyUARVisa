@@ -101,14 +101,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         const applicantEmail = document.getElementById('applicantEmail').value;
         const aedAmount = parseFloat(document.getElementById('amount').value);
         const country = document.getElementById('country').value;
-        const gateway = document.getElementById('paymentGateway').value;
         
-        if (!applicationId || !applicantName || !applicantEmail || !aedAmount || !country || !gateway) {
+        if (!applicationId || !applicantName || !applicantEmail || !aedAmount || !country) {
             showError('Please fill in all required fields');
             return;
         }
         
-        // Convert AED to ZAR for South Africa (both gateways use ZAR)
+        // Convert AED to ZAR for South Africa
         let paymentAmount = aedAmount;
         if (country === 'South Africa' && exchangeRates['ZAR']) {
             paymentAmount = aedAmount * exchangeRates['ZAR'];
@@ -127,16 +126,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Get the current domain for backend URL
         const currentDomain = window.location.origin;
-        
-        // Choose backend endpoint based on selected gateway
-        let backendURL;
-        if (gateway === 'paygate') {
-            backendURL = `${currentDomain}/api/paygate/initiate`;
-        } else if (gateway === 'peach') {
-            backendURL = `${currentDomain}/api/peach/initiate`;
-        } else {
-            backendURL = `${currentDomain}/api/payments/start`;
-        }
+        const backendURL = `${currentDomain}/api/payments/start`;
         
         try {
             // Stage 2: Calling backend
@@ -170,41 +160,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             console.log('Payment initiated:', data);
             
-            // Handle different gateway response types
-            if (data.gateway === 'paygate') {
-                // PayGate: Direct redirect to payment URL
-                if (data.paymentUrl) {
-                    showSuccessModal('Payment initiated successfully! Redirecting to PayGate...');
-                    setTimeout(() => {
-                        window.location.href = data.paymentUrl;
-                    }, 2000);
-                } else {
-                    throw new Error('No payment URL received from PayGate');
-                }
-            } else if (data.gateway === 'peach') {
-                // Peach Payments: Direct redirect to payment URL
-                if (data.paymentUrl) {
-                    const testNote = data.testMode ? ' (Test Mode)' : '';
-                    showSuccessModal(`Payment initiated successfully!${testNote} Redirecting to Peach Payments...`);
-                    setTimeout(() => {
-                        window.location.href = data.paymentUrl;
-                    }, 2000);
-                } else {
-                    throw new Error('No payment URL received from Peach Payments');
-                }
-            } else if (data.gateway === 'payfast') {
-                // PayFast: Submit POST form
-                if (data.paymentUrl && data.formData) {
-                    const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
-                    showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
-                    setTimeout(() => {
-                        submitPayFastForm(data.paymentUrl, data.formData);
-                    }, 2000);
-                } else {
-                    throw new Error('No payment data received from server');
-                }
+            // Handle PayFast response
+            if (data.paymentUrl && data.formData) {
+                const sandboxNote = data.sandbox ? ' (Sandbox Mode - Test Payment)' : '';
+                showSuccessModal(`Payment initiated successfully!${sandboxNote} Redirecting to PayFast...`);
+                setTimeout(() => {
+                    submitPayFastForm(data.paymentUrl, data.formData);
+                }, 2000);
             } else {
-                throw new Error('Unknown payment gateway');
+                throw new Error('No payment data received from server');
             }
             
         } catch (error) {
