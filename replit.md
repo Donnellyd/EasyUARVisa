@@ -1,6 +1,6 @@
 # Overview
 
-UAE VISA is a Flask-based web application serving as the official UAE visa application portal. It provides a comprehensive platform for visa applications, status tracking, and information display, designed with a professional aesthetic incorporating UAE national colors. The project integrates with the **dubai-visa-ai** backend (`https://dubai-visa-ai-duane16.replit.app`) for application processing and tracking, and includes integrated payment processing via multiple gateways (PayFast, PayGate, Peach Payments) directly within the Flask application.
+UAE VISA is a Flask-based web application serving as the official UAE visa application portal. It provides a comprehensive platform for visa applications, status tracking, and information display, designed with a professional aesthetic incorporating UAE national colors. The project aims to offer a seamless and secure visa application experience, leveraging a Node.js backend for robust payment processing via PayFast.
 
 # User Preferences
 
@@ -21,7 +21,7 @@ The design adheres strictly to a UAE national color palette (red, green, white, 
 The project maintains a clear separation of concerns with HTML, CSS, and JavaScript files organized into distinct modules. Asset management utilizes CDNs for external fonts (Google Fonts) and icons (Font Awesome).
 
 ## Backend Integration
-The application integrates with the **dubai-visa-ai** backend at `https://dubai-visa-ai-duane16.replit.app` for application submission, status tracking, and document uploads via the Dubai Visa Portal SDK. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality. Payment gateway integrations are handled directly within the Flask application.
+The application integrates with a backend portal for application submission, status tracking, and document uploads. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality.
 
 ## Payment Integration
 Payment processing is a core feature supporting **multiple payment gateways** for South African visa applicants. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
@@ -33,7 +33,7 @@ The system uses the "country" field from the application form to determine payme
 - **Payment page display**: For South African applicants, ZAR amount is shown prominently in RED, with AED shown as small reference text. A clear notice states "You will be charged ZAR X.XX"
 
 ## Multi-Gateway Payment Architecture
-All payment gateway integrations are implemented directly in the Flask application (port 5000) using Python. A PostgreSQL database tracks payment statuses across all gateways. Payment logic includes signature generation (MD5 for PayFast/PayGate, HMAC SHA-256 for Peach), API integration with each gateway, and webhook/callback handling.
+A dual-server setup is employed: a Flask frontend (port 5000) and a Node.js Express backend (port 3000) dedicated to payment gateway integrations. A PostgreSQL database tracks payment statuses across all gateways.
 
 ### Supported Payment Gateways
 
@@ -49,7 +49,13 @@ All payment gateway integrations are implemented directly in the Flask applicati
    - Return URL: `paygate-return.html`
    - Environment variables: `PAYGATE_ID`, `PAYGATE_ENCRYPTION_KEY`
 
-3. **Peach Payments** (Test Mode)
+3. **iKhokha** (Test Mode)
+   - REST API integration
+   - Application ID/Secret authentication
+   - Return URL: `ikhokha-return.html`
+   - Environment variables: `IKHOKHA_APPLICATION_ID`, `IKHOKHA_APPLICATION_SECRET`, `IKHOKHA_TEST_MODE`
+
+4. **Peach Payments** (Test Mode) - **NEW**
    - HMAC SHA-256 signature verification
    - Hosted checkout integration
    - South Africa's leading payment gateway (2.95% card fees, 1.5% Pay by Bank)
@@ -96,13 +102,12 @@ CREATE TABLE payments (
 ## Payment Gateways
 - **PayFast**: Sandbox mode for testing
 - **PayGate**: South African payment gateway
+- **iKhokha**: eCommerce payment gateway with test mode
 - **Peach Payments**: Leading SA gateway with multiple payment methods (cards, wallets, EFT)
 
 ## Backend Services
-- **Flask Application**: Serves frontend and handles all payment gateway integrations (port 5000)
+- **Node.js Express**: Dedicated backend for all payment gateway integrations (port 3000)
 - **PostgreSQL**: Database for payment tracking
-- **Flask-SQLAlchemy**: ORM for database interactions
-- **Gunicorn**: Production WSGI server
 
 ## Environment Variables (Replit Secrets)
 ### PayFast
@@ -114,6 +119,11 @@ CREATE TABLE payments (
 ### PayGate
 - `PAYGATE_ID`
 - `PAYGATE_ENCRYPTION_KEY`
+
+### iKhokha
+- `IKHOKHA_APPLICATION_ID`
+- `IKHOKHA_APPLICATION_SECRET`
+- `IKHOKHA_TEST_MODE`
 
 ### Peach Payments
 - `PEACH_ENTITY_ID`

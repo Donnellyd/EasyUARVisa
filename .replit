@@ -6,7 +6,8 @@ packages = ["openssl", "postgresql"]
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind", "0.0.0.0:5000", "--reuse-port", "main:app"]
+publicDir = "/"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 
 [workflows]
 runButton = "Project"
@@ -20,6 +21,10 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Payment Backend"
+
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -32,6 +37,18 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Payment Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node backend/server.js"
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 3000
 externalPort = 4200
@@ -43,10 +60,6 @@ externalPort = 80
 [[ports]]
 localPort = 35671
 externalPort = 3003
-
-[[ports]]
-localPort = 36433
-externalPort = 5000
 
 [[ports]]
 localPort = 37803
