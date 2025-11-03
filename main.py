@@ -92,10 +92,6 @@ def start_payment():
         else:
             app_base_url = 'http://localhost:5000'
         
-        # URL-encode cancel_url parameters to fix special character validation
-        from urllib.parse import quote
-        cancel_url = f"{app_base_url}/payment.html?ref={quote(str(application_id))}&name={quote(str(applicant_name))}&email={quote(str(applicant_email))}&amount={amount}"
-        
         payment_data = {
             'merchant_id': config['merchant_id'],
             'merchant_key': config['merchant_key'],
@@ -107,7 +103,7 @@ def start_payment():
             'item_name': description,
             'item_description': f"{description} - {application_id}",
             'return_url': f"{app_base_url}/payment-success.html?ref={reference}",
-            'cancel_url': cancel_url,
+            'cancel_url': f"{app_base_url}/payment.html?ref={application_id}&name={applicant_name}&email={applicant_email}&amount={amount}",
             'notify_url': f"{app_base_url}/api/payments/verify",
             'custom_str1': application_id,
             'custom_str2': country
