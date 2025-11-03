@@ -41,12 +41,12 @@ def proxy_payment_api(path):
     backend_url = f'http://localhost:3000/api/payments/{path}'
     
     if request.method == 'GET':
-        resp = requests.get(backend_url, params=request.args)
+        resp = requests.get(backend_url, params=request.args.to_dict())
     elif request.method == 'POST':
         resp = requests.post(backend_url, json=request.get_json(), headers={'Content-Type': 'application/json'})
     elif request.method == 'PUT':
         resp = requests.put(backend_url, json=request.get_json(), headers={'Content-Type': 'application/json'})
-    elif request.method == 'DELETE':
+    else:  # DELETE
         resp = requests.delete(backend_url)
     
     return resp.content, resp.status_code, {'Content-Type': resp.headers.get('Content-Type', 'application/json')}
