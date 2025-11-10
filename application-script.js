@@ -140,7 +140,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 await uploadDocuments(applicationId);
                 
             } catch (backendError) {
-                console.warn('Backend submission failed, using localStorage fallback:', backendError);
+                console.error('❌ Backend submission failed - Full error details:');
+                console.error('Error message:', backendError.message);
+                console.error('Error object:', backendError);
+                console.error('Error stack:', backendError.stack);
                 
                 // Backend failed - fall back to localStorage
                 useLocalStorage = true;

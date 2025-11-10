@@ -37,6 +37,8 @@ class DubaiVisaPortalSDK {
    */
   async _request(endpoint, options = {}) {
     const url = `${this.apiBaseUrl}${endpoint}`;
+    console.log(`🌐 SDK Request: ${options.method || 'GET'} ${url}`);
+    
     const defaultOptions = {
       credentials: 'include',
       headers: {
@@ -47,14 +49,17 @@ class DubaiVisaPortalSDK {
 
     try {
       const response = await fetch(url, { ...defaultOptions, ...options });
+      console.log(`📡 SDK Response: ${response.status} ${response.statusText}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        console.error(`❌ SDK API Error:`, errorData);
         throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       return await response.json();
     } catch (error) {
+      console.error(`❌ SDK Request Failed:`, error.message);
       this.onError(error);
       throw error;
     }
@@ -113,6 +118,8 @@ class DubaiVisaPortalSDK {
    * @returns {Promise<Object>} Created application data
    */
   async submitApplication(applicationData) {
+    console.log('📋 SDK: Validating application data...');
+    
     // Validate required fields
     const requiredFields = [
       'firstName', 'lastName', 'dateOfBirth', 'nationality', 'gender',
@@ -122,9 +129,13 @@ class DubaiVisaPortalSDK {
 
     for (const field of requiredFields) {
       if (!applicationData[field]) {
+        console.error(`❌ SDK Validation Failed: Missing required field '${field}'`);
+        console.error(`   Field value:`, applicationData[field]);
         throw new Error(`Missing required field: ${field}`);
       }
     }
+    
+    console.log('✅ SDK: All required fields validated')
 
     // Set defaults
     const payload = {
