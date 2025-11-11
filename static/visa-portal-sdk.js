@@ -122,7 +122,7 @@ class DubaiVisaPortalSDK {
     
     // Validate required fields
     const requiredFields = [
-      'firstName', 'lastName', 'dateOfBirth', 'nationality', 'gender',
+      'firstName', 'lastName', 'dateOfBirth', 'nationality',
       'email', 'passportNumber', 'passportIssueDate', 'passportExpiryDate',
       'visaType', 'processingTime'
     ];
