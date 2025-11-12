@@ -1,0 +1,30 @@
+{
+  "name": "payfast-payment-gateway",
+  "version": "1.0.0",
+  "description": "Standalone PayFast payment gateway server - Ready to deploy on Replit",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "init-db": "node database/init.js"
+  },
+  "keywords": [
+    "payfast",
+    "payment",
+    "gateway",
+    "south-africa",
+    "payments",
+    "replit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
