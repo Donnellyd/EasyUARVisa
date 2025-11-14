@@ -78,7 +78,7 @@
     <script>
         // Initialize SDK
         const sdk = new DubaiVisaPortalSDK({
-            apiBaseUrl: '',
+            apiBaseUrl: window.location.origin,
             onError: (error) => console.error('SDK Error:', error),
             onSuccess: (message) => console.log('SDK Success:', message)
         });
