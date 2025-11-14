@@ -58,7 +58,7 @@ def proxy_payment_api(path):
     return resp.content, resp.status_code, {'Content-Type': resp.headers.get('Content-Type', 'application/json')}
 
 # Proxy Dubai VISA AI API requests
-@app.route('/api/visa/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/api/website/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def proxy_visa_api(path):
     backend_url = f'{DUBAI_VISA_API_URL}/api/website/{path}'
     
