@@ -21,7 +21,20 @@ The design adheres strictly to a UAE national color palette (red, green, white, 
 The project maintains a clear separation of concerns with HTML, CSS, and JavaScript files organized into distinct modules. Asset management utilizes CDNs for external fonts (Google Fonts) and icons (Font Awesome).
 
 ## Backend Integration
-The application integrates with a backend portal for application submission, status tracking, and document uploads. It features a fallback system that uses localStorage when the backend is unavailable, ensuring continuous functionality.
+The application integrates with Dubai VISA AI backend (`https://dubai-visa-ai-duane16.replit.app`) for application submission, status tracking, and document uploads. 
+
+### API Proxy Architecture
+To resolve CORS issues and improve security, the Flask application acts as a proxy between the frontend and Dubai VISA AI backend:
+- **Frontend** makes requests to `/api/website/*` (same domain, no CORS)
+- **Flask proxy** forwards requests to Dubai VISA AI with X-API-Key authentication
+- **API Key** is stored securely on the server (not exposed in browser)
+- **Fallback system** uses localStorage when the backend is unavailable
+
+### Security Features
+- API key authentication via X-API-Key header
+- Server-side request forwarding prevents API key exposure
+- CORS enabled via flask-cors for cross-origin support
+- Timeout protection (10 seconds) for backend requests
 
 ## Payment Integration
 Payment processing is a core feature using **PayFast** for South African visa applicants. The system auto-redirects users to a payment page after application submission, pre-filling applicant details. A payment fallback system ensures that payment intents are saved locally if the payment gateway is unavailable, allowing users to complete payment later.
@@ -101,3 +114,6 @@ CREATE TABLE payments (
 
 ### Session Management
 - `SESSION_SECRET` - Flask session encryption key
+
+### Dubai VISA AI Integration (Required)
+- `DUBAI_VISA_API_KEY` - API key for authenticating with Dubai VISA AI backend (365916b021f8584132e2fd5c95e60c0c61c21f3167f2fbc79b5f625d22c00059)
