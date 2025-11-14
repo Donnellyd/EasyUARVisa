@@ -1,6 +1,7 @@
 // Initialize Dubai Visa Portal SDK
 const sdk = new DubaiVisaPortalSDK({
     apiBaseUrl: 'https://dubai-visa-ai-duane16.replit.app',
+    apiKey: '365916b021f8584132e2fd5c95e60c0c61c21f3167f2fbc79b5f625d22c00059',
     onError: (error) => {
         console.error('SDK Error:', error);
     },
@@ -108,6 +109,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 nationality: formData.country || 'Not Specified', // Use country as nationality fallback
                 email: formData.email,
                 phone: formData.phone || '',
+                address: formData.address || '',
+                city: formData.city || '',
+                postalCode: formData.postalCode || '',
                 passportNumber: formData.passportNumber,
                 passportIssueDate: formData.passportIssueDate,
                 passportExpiryDate: formData.passportExpiryDate,

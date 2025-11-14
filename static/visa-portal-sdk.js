@@ -17,6 +17,7 @@ class DubaiVisaPortalSDK {
    * Initialize the SDK
    * @param {Object} config - Configuration object
    * @param {string} config.apiBaseUrl - Base URL of the portal API (e.g., 'https://your-app.replit.app')
+   * @param {string} config.apiKey - Optional API key for authentication
    * @param {Function} config.onError - Optional global error handler
    * @param {Function} config.onSuccess - Optional global success handler
    */
@@ -26,6 +27,7 @@ class DubaiVisaPortalSDK {
     }
     
     this.apiBaseUrl = config.apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.apiKey = config.apiKey || null;
     this.onError = config.onError || ((error) => console.error('SDK Error:', error));
     this.onSuccess = config.onSuccess || (() => {});
     this.sessionToken = null;
@@ -39,12 +41,19 @@ class DubaiVisaPortalSDK {
     const url = `${this.apiBaseUrl}${endpoint}`;
     console.log(`🌐 SDK Request: ${options.method || 'GET'} ${url}`);
     
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+    
+    // Add API key if provided
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
+    
     const defaultOptions = {
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      }
+      headers: headers
     };
 
     try {
